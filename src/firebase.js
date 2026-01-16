@@ -19,6 +19,7 @@ const firebaseConfig = {
 
 // Ініціалізація додатку Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 // Експорт бази даних, щоб використовувати її в App.jsx
 export const db = getFirestore(app);
