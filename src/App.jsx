@@ -145,7 +145,8 @@ const App = () => {
     setIsLoading(true);
     
     // --- LOCAL VS CODE BLOCK ---
-    /* РОЗКОМЕНТУЙТЕ ЦЕЙ БЛОК У VS CODE
+    // РОЗКОМЕНТУЙТЕ ЦЕЙ БЛОК У VS CODE
+    
     try {
         await setDoc(doc(db, "projects", projectName), {
             items,
@@ -159,7 +160,6 @@ const App = () => {
         console.error("Error saving document: ", e);
         alert("Помилка збереження! Перевірте правильність файлу firebase.js.");
     }
-    */
     
     // --- PREVIEW ONLY BLOCK ---
     alert(`[РЕЖИМ ПЕРЕГЛЯДУ] Проект "${projectName}" готовий до збереження.\n\nУ VS Code розкоментуйте код Firebase у файлі src/App.jsx, щоб це запрацювало по-справжньому.`);
@@ -173,7 +173,7 @@ const App = () => {
       setIsLoading(true);
 
       // --- LOCAL VS CODE BLOCK ---
-      /* РОЗКОМЕНТУЙТЕ ЦЕЙ БЛОК У VS CODE
+      // РОЗКОМЕНТУЙТЕ ЦЕЙ БЛОК У VS CODE
       try {
           const docRef = doc(db, "projects", nameToLoad);
           const docSnap = await getDoc(docRef);
@@ -192,7 +192,7 @@ const App = () => {
           console.error("Error loading document: ", e);
           alert("Помилка завантаження! Перевірте з'єднання з базою.");
       }
-      */
+
       
       // --- PREVIEW ONLY BLOCK ---
       alert(`[РЕЖИМ ПЕРЕГЛЯДУ] Спроба завантажити "${nameToLoad}".\n\nУ VS Code розкоментуйте код Firebase у файлі src/App.jsx.`);
