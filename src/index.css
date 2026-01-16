@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Стилі для друку PDF */
+@media print {
+  @page { size: auto; margin: 0mm; }
+  html, body { 
+    height: auto !important; 
+    overflow: visible !important; 
+    overflow-x: visible !important; 
+  }
+  #root { 
+    height: auto !important; 
+    overflow: visible !important; 
+  }
+  /* Приховуємо елементи, які не повинні бути на папері */
+  .hide-on-print {
+    display: none !important;
+  }
+}
