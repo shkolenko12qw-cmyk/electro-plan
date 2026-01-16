@@ -16,9 +16,9 @@ import {
   Check, 
   Hand, 
   MousePointer, 
-  RotateCw,  
+  RotateCw, 
   Layers, 
-  Palette,
+  Palette, 
   Download, 
   Printer, 
   Eye, 
@@ -27,102 +27,23 @@ import {
   CloudDownload 
 } from 'lucide-react';
 
-// --- FIREBASE IMPORTS ---
-// УВАГА: Розкоментуйте ці два рядки у вашому локальному проекті VS Code!
+// --- FIREBASE IMPORTS (АКТИВОВАНО) ---
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from './firebase'; 
 
 // --- MOCK DATA ---
 const PRODUCTS = [
-  { 
-    id: 'gira-e2-socket-black', 
-    sku: '4188005', 
-    name: 'Gira E2 Розетка (Чорний)', 
-    category: 'socket', 
-    brand: 'Gira', 
-    series: 'E2', 
-    color: '#1a1a1a', 
-    price: 450, 
-    width: 71, 
-    height: 71, 
-    shape: 'socket' 
-  },
-  { 
-    id: 'gira-e2-switch-black', 
-    sku: '0106005', 
-    name: 'Gira E2 Вимикач (Чорний)', 
-    category: 'switch', 
-    brand: 'Gira', 
-    series: 'E2', 
-    color: '#1a1a1a', 
-    price: 520, 
-    width: 71, 
-    height: 71, 
-    shape: 'switch' 
-  },
-  { 
-    id: 'gira-e2-socket-white', 
-    sku: '418804', 
-    name: 'Gira E2 Розетка (Білий)', 
-    category: 'socket', 
-    brand: 'Gira', 
-    series: 'E2', 
-    color: '#fdfdfd', 
-    price: 380, 
-    width: 71, 
-    height: 71, 
-    shape: 'socket' 
-  },
-  { 
-    id: 'gira-e3-socket-sand', 
-    sku: '4188-E3-S', 
-    name: 'Gira E3 Розетка (Пісочний)', 
-    category: 'socket', 
-    brand: 'Gira', 
-    series: 'E3', 
-    color: '#d6cbb6', 
-    price: 550, 
-    width: 71, 
-    height: 71, 
-    shape: 'socket' 
-  },
-  { 
-    id: 'led-profile-deep', 
-    sku: 'PROF-001', 
-    name: 'LED Профіль', 
-    category: 'light', 
-    brand: 'Lumina', 
-    series: 'Pro', 
-    color: '#cccccc', 
-    price: 350, 
-    width: 1000, 
-    height: 25, 
-    shape: 'linear' 
-  }
+  { id: 'gira-e2-socket-black', sku: '4188005', name: 'Gira E2 Розетка (Чорний)', category: 'socket', brand: 'Gira', series: 'E2', color: '#1a1a1a', price: 450, width: 71, height: 71, shape: 'socket' },
+  { id: 'gira-e2-switch-black', sku: '0106005', name: 'Gira E2 Вимикач (Чорний)', category: 'switch', brand: 'Gira', series: 'E2', color: '#1a1a1a', price: 520, width: 71, height: 71, shape: 'switch' },
+  { id: 'gira-e2-socket-white', sku: '418804', name: 'Gira E2 Розетка (Білий)', category: 'socket', brand: 'Gira', series: 'E2', color: '#fdfdfd', price: 380, width: 71, height: 71, shape: 'socket' },
+  { id: 'gira-e3-socket-sand', sku: '4188-E3-S', name: 'Gira E3 Розетка (Пісочний)', category: 'socket', brand: 'Gira', series: 'E3', color: '#d6cbb6', price: 550, width: 71, height: 71, shape: 'socket' },
+  { id: 'led-profile-deep', sku: 'PROF-001', name: 'LED Профіль', category: 'light', brand: 'Lumina', series: 'Pro', color: '#cccccc', price: 350, width: 1000, height: 25, shape: 'linear' }
 ];
 
 const AUTO_FRAMES = {
-    'E2': { 
-        1: { name: 'E2 Рамка 1-п', price: 120 }, 
-        2: { name: 'E2 Рамка 2-п', price: 210 }, 
-        3: { name: 'E2 Рамка 3-п', price: 350 }, 
-        4: { name: 'E2 Рамка 4-п', price: 580 }, 
-        5: { name: 'E2 Рамка 5-п', price: 820 } 
-    },
-    'E3': { 
-        1: { name: 'E3 Рамка 1-п', price: 250 }, 
-        2: { name: 'E3 Рамка 2-п', price: 480 }, 
-        3: { name: 'E3 Рамка 3-п', price: 690 }, 
-        4: { name: 'E3 Рамка 4-п', price: 920 }, 
-        5: { name: 'E3 Рамка 5-п', price: 1150 } 
-    },
-    'Esprit': { 
-        1: { name: 'Esprit Рамка 1-п', price: 950 }, 
-        2: { name: 'Esprit Рамка 2-п', price: 1800 }, 
-        3: { name: 'Esprit Рамка 3-п', price: 2600 }, 
-        4: { name: 'Esprit Рамка 4-п', price: 3400 }, 
-        5: { name: 'Esprit Рамка 5-п', price: 4200 } 
-    }
+    'E2': { 1: { name: 'E2 Рамка 1-п', price: 120 }, 2: { name: 'E2 Рамка 2-п', price: 210 }, 3: { name: 'E2 Рамка 3-п', price: 350 }, 4: { name: 'E2 Рамка 4-п', price: 580 }, 5: { name: 'E2 Рамка 5-п', price: 820 } },
+    'E3': { 1: { name: 'E3 Рамка 1-п', price: 250 }, 2: { name: 'E3 Рамка 2-п', price: 480 }, 3: { name: 'E3 Рамка 3-п', price: 690 }, 4: { name: 'E3 Рамка 4-п', price: 920 }, 5: { name: 'E3 Рамка 5-п', price: 1150 } },
+    'Esprit': { 1: { name: 'Esprit Рамка 1-п', price: 950 }, 2: { name: 'Esprit Рамка 2-п', price: 1800 }, 3: { name: 'Esprit Рамка 3-п', price: 2600 }, 4: { name: 'Esprit Рамка 4-п', price: 3400 }, 5: { name: 'Esprit Рамка 5-п', price: 4200 } }
 };
 
 const ProductShape = ({ item, isSelected }) => {
@@ -133,16 +54,7 @@ const ProductShape = ({ item, isSelected }) => {
     return (
       <g>
         {isSelected && (
-          <rect 
-            x={-2} y={-2} 
-            width={item.width + 4} 
-            height={item.height + 4} 
-            fill="none" 
-            stroke={strokeColor} 
-            strokeWidth={2} 
-            vectorEffect="non-scaling-stroke" 
-            rx={isRound ? 8 : 4}
-          />
+          <rect x={-2} y={-2} width={item.width + 4} height={item.height + 4} fill="none" stroke={strokeColor} strokeWidth={2} vectorEffect="non-scaling-stroke" rx={isRound ? 8 : 4} />
         )}
         <rect width={item.width} height={item.height} fill={item.color} rx={isRound ? 6 : 2} />
         <circle cx={item.width/2} cy={item.height/2} r={24} fill="rgba(0,0,0,0.1)" />
@@ -156,16 +68,7 @@ const ProductShape = ({ item, isSelected }) => {
     return (
       <g>
          {isSelected && (
-           <rect 
-             x={-2} y={-2} 
-             width={item.width + 4} 
-             height={item.height + 4} 
-             fill="none" 
-             stroke={strokeColor} 
-             strokeWidth={2} 
-             vectorEffect="non-scaling-stroke" 
-             rx={isRound ? 8 : 4}
-            />
+           <rect x={-2} y={-2} width={item.width + 4} height={item.height + 4} fill="none" stroke={strokeColor} strokeWidth={2} vectorEffect="non-scaling-stroke" rx={isRound ? 8 : 4} />
          )}
         <rect width={item.width} height={item.height} fill={item.color} rx={isRound ? 6 : 2} />
         <rect x={6} y={6} width={item.width-12} height={item.height-12} fill="rgba(255,255,255,0.05)" stroke="rgba(0,0,0,0.2)" strokeWidth={1} rx={isRound ? 4 : 1}/>
@@ -249,13 +152,11 @@ const App = () => {
       };
   };
 
-  // --- FIREBASE LOGIC (Commented out for Preview) ---
+  // --- FIREBASE LOGIC (АКТИВОВАНО) ---
   const saveProject = async () => {
     if (!projectName) return alert("Введіть назву проекту!");
     setIsLoading(true);
     
-    // --- LOCAL CODE START ---
-    /* // Розкоментуйте цей блок у VS Code!
     try {
         await setDoc(doc(db, "projects", projectName), {
             items,
@@ -267,13 +168,9 @@ const App = () => {
         alert(`Проект "${projectName}" успішно збережено в хмару!`);
     } catch (e) {
         console.error("Error saving document: ", e);
-        alert("Помилка збереження! Перевірте консоль.");
+        alert("Помилка збереження! Перевірте правильність файлу firebase.js.");
     }
-    */
-    // --- LOCAL CODE END ---
-
-    // Preview simulation
-    alert(`[PREVIEW MODE] Проект "${projectName}" готовий до збереження.\n\nУ VS Code розкоментуйте код Firebase, щоб це запрацювало по-справжньому.`);
+    
     setIsLoading(false);
   };
 
@@ -282,9 +179,6 @@ const App = () => {
       if (!nameToLoad) return;
       setIsLoading(true);
 
-      // --- LOCAL CODE START ---
-      /*
-      // Розкоментуйте цей блок у VS Code!
       try {
           const docRef = doc(db, "projects", nameToLoad);
           const docSnap = await getDoc(docRef);
@@ -301,13 +195,9 @@ const App = () => {
           }
       } catch (e) {
           console.error("Error loading document: ", e);
-          alert("Помилка завантаження!");
+          alert("Помилка завантаження! Перевірте з'єднання з базою.");
       }
-      */
-      // --- LOCAL CODE END ---
       
-      // Preview simulation
-      alert(`[PREVIEW MODE] Спроба завантажити "${nameToLoad}".\n\nУ VS Code розкоментуйте код Firebase.`);
       setIsLoading(false);
   };
 
@@ -332,7 +222,6 @@ const App = () => {
                 const rot = (current.rotation || 0) % 180;
                 let isAdjacent = false;
                 const distTolerance = 5; 
-                
                 if (rot === 0) {
                     const xDist = Math.abs(currBounds.centerX - candBounds.centerX);
                     const yDist = Math.abs(currBounds.centerY - candBounds.centerY);
@@ -342,7 +231,6 @@ const App = () => {
                     const yDist = Math.abs(currBounds.centerY - candBounds.centerY);
                     if (Math.abs(yDist - FRAME_PITCH) < distTolerance && xDist < distTolerance) isAdjacent = true;
                 }
-                
                 if (isAdjacent) { 
                     visited.add(candidate.uniqueId); 
                     group.push(candidate); 
@@ -538,7 +426,6 @@ const App = () => {
 
   return (
     <div className={`flex h-screen flex-col bg-gray-100 font-sans text-gray-800 overflow-hidden ${isPreviewMode ? 'print-preview-mode' : ''} print:block print:h-auto print:overflow-visible`} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
-      <style>{`@media print { @page { size: auto; margin: 5mm; } html, body, #root { height: auto !important; overflow: visible !important; } .hide-on-print { display: none !important; } } .print-preview-mode .screen-only { display: none !important; } .print-preview-mode .print-content-wrapper { background: white; margin: 20px auto; max-width: 210mm; box-shadow: 0 0 20px rgba(0,0,0,0.1); min-height: 297mm; padding: 10mm; }`}</style>
       
       {/* HEADER */}
       <header className="bg-white border-b h-14 flex items-center justify-between px-6 shadow-sm z-10 select-none screen-only">
@@ -644,9 +531,4 @@ const App = () => {
   );
 };
 
-// --- RENDER ---
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+export default App;
