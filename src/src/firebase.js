@@ -1,11 +1,12 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// --- ВАШІ КЛЮЧІ З FIREBASE CONSOLE ---
+// 1. Відкрийте https://console.firebase.google.com/
+// 2. Виберіть ваш проект -> Налаштування (шестерня зліва зверху) -> Project Settings
+// 3. Прокрутіть вниз до розділу "Your apps" (SDK setup and configuration)
+// 4. Скопіюйте дані з об'єкта firebaseConfig і вставте їх сюди замість значень нижче:
+
 const firebaseConfig = {
   apiKey: "AIzaSyBadXcmq0pVgMnc9lbanJFvukdncZ6wc00",
   authDomain: "electro-plan-45d86.firebaseapp.com",
@@ -16,6 +17,8 @@ const firebaseConfig = {
   measurementId: "G-342XBXLHZ0"
 };
 
-// Initialize Firebase
+// Ініціалізація додатку Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Експорт бази даних, щоб використовувати її в App.jsx
+export const db = getFirestore(app);
