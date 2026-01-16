@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 
 // --- FIREBASE IMPORTS ---
-// УВАГА: Розкоментуйте ці два рядки у вашому локальному проекті VS Code!
+// УВАГА: Розкоментуйте ці два рядки у вашому локальному проекті VS Code!іі
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from './firebase'; 
 
