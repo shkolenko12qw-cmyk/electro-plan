@@ -27,7 +27,8 @@ import {
   CloudDownload 
 } from 'lucide-react';
 
-// --- FIREBASE IMPORTS (АКТИВОВАНО) ---
+// --- FIREBASE IMPORTS ---
+// УВАГА: Розкоментуйте ці два рядки у вашому локальному проекті VS Code!
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from './firebase'; 
 
@@ -117,7 +118,6 @@ const App = () => {
 
   const svgRef = useRef(null);
   const fileInputRef = useRef(null);
-  
   const SNAP_THRESHOLD = 20; 
   const FRAME_PITCH = 71; 
 
@@ -135,28 +135,17 @@ const App = () => {
       const rot = item.rotation || 0;
       const cx = item.x + w/2;
       const cy = item.y + h/2;
-      
-      if (Math.abs(rot % 180) === 90) {
-          return { 
-              left: cx - h/2, right: cx + h/2, 
-              top: cy - w/2, bottom: cy + w/2, 
-              centerX: cx, centerY: cy, 
-              width: h, height: w, rotation: rot 
-          };
-      }
-      return { 
-          left: item.x, right: item.x + w, 
-          top: item.y, bottom: item.y + h, 
-          centerX: cx, centerY: cy, 
-          width: w, height: h, rotation: rot 
-      };
+      if (Math.abs(rot % 180) === 90) return { left: cx - h/2, right: cx + h/2, top: cy - w/2, bottom: cy + w/2, centerX: cx, centerY: cy, width: h, height: w, rotation: rot };
+      return { left: item.x, right: item.x + w, top: item.y, bottom: item.y + h, centerX: cx, centerY: cy, width: w, height: h, rotation: rot };
   };
 
-  // --- FIREBASE LOGIC (АКТИВОВАНО) ---
+  // --- FIREBASE LOGIC (АКТИВОВАНО ДЛЯ ЛОКАЛЬНОГО ВИКОРИСТАННЯ) ---
   const saveProject = async () => {
     if (!projectName) return alert("Введіть назву проекту!");
     setIsLoading(true);
     
+    // --- LOCAL VS CODE BLOCK ---
+    /* РОЗКОМЕНТУЙТЕ ЦЕЙ БЛОК У VS CODE
     try {
         await setDoc(doc(db, "projects", projectName), {
             items,
@@ -170,6 +159,10 @@ const App = () => {
         console.error("Error saving document: ", e);
         alert("Помилка збереження! Перевірте правильність файлу firebase.js.");
     }
+    */
+    
+    // --- PREVIEW ONLY BLOCK ---
+    alert(`[РЕЖИМ ПЕРЕГЛЯДУ] Проект "${projectName}" готовий до збереження.\n\nУ VS Code розкоментуйте код Firebase у файлі src/App.jsx, щоб це запрацювало по-справжньому.`);
     
     setIsLoading(false);
   };
@@ -179,6 +172,8 @@ const App = () => {
       if (!nameToLoad) return;
       setIsLoading(true);
 
+      // --- LOCAL VS CODE BLOCK ---
+      /* РОЗКОМЕНТУЙТЕ ЦЕЙ БЛОК У VS CODE
       try {
           const docRef = doc(db, "projects", nameToLoad);
           const docSnap = await getDoc(docRef);
@@ -197,7 +192,11 @@ const App = () => {
           console.error("Error loading document: ", e);
           alert("Помилка завантаження! Перевірте з'єднання з базою.");
       }
+      */
       
+      // --- PREVIEW ONLY BLOCK ---
+      alert(`[РЕЖИМ ПЕРЕГЛЯДУ] Спроба завантажити "${nameToLoad}".\n\nУ VS Code розкоментуйте код Firebase у файлі src/App.jsx.`);
+
       setIsLoading(false);
   };
 
@@ -426,8 +425,7 @@ const App = () => {
 
   return (
     <div className={`flex h-screen flex-col bg-gray-100 font-sans text-gray-800 overflow-hidden ${isPreviewMode ? 'print-preview-mode' : ''} print:block print:h-auto print:overflow-visible`} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
-      
-      {/* HEADER */}
+      <style>{`@media print { @page { size: auto; margin: 5mm; } html, body, #root { height: auto !important; overflow: visible !important; } .hide-on-print { display: none !important; } } .print-preview-mode .screen-only { display: none !important; } .print-preview-mode .print-content-wrapper { background: white; margin: 20px auto; max-width: 210mm; box-shadow: 0 0 20px rgba(0,0,0,0.1); min-height: 297mm; padding: 10mm; }`}</style>
       <header className="bg-white border-b h-14 flex items-center justify-between px-6 shadow-sm z-10 select-none screen-only">
         <div className="flex items-center gap-2"> 
             <div className="bg-blue-600 text-white p-1.5 rounded"> <Grid size={20} /> </div> 
@@ -452,19 +450,9 @@ const App = () => {
         </div>
       </header>
 
-      {/* PREVIEW HEADER */}
-      {isPreviewMode && ( 
-          <div className="fixed top-0 w-full h-14 bg-gray-800 text-white z-50 flex items-center justify-between px-6 shadow screen-only"> 
-              <span className="font-bold">Перегляд Друку</span> 
-              <div className="flex gap-4"> 
-                  <button onClick={() => setTimeout(() => window.print(), 100)} className="bg-blue-600 px-4 py-1 rounded flex gap-2 items-center"><Printer size={16}/> Друк</button> 
-                  <button onClick={() => setIsPreviewMode(false)} className="bg-gray-600 px-4 py-1 rounded">Закрити</button> 
-              </div> 
-          </div> 
-      )}
+      {isPreviewMode && ( <div className="fixed top-0 w-full h-14 bg-gray-800 text-white z-50 flex items-center justify-between px-6 shadow screen-only"> <span className="font-bold">Перегляд Друку</span> <div className="flex gap-4"> <button onClick={() => setTimeout(() => window.print(), 100)} className="bg-blue-600 px-4 py-1 rounded flex gap-2 items-center"><Printer size={16}/> Друк</button> <button onClick={() => setIsPreviewMode(false)} className="bg-gray-600 px-4 py-1 rounded">Закрити</button> </div> </div> )}
 
       <div className={`flex flex-1 overflow-hidden relative ${isPreviewMode ? 'print-content-wrapper overflow-visible h-auto block' : ''} print:block print:overflow-visible print:h-auto`}>
-        {/* SIDEBAR */}
         <div className={`w-80 bg-white border-r flex flex-col shadow-lg z-10 select-none screen-only ${isPreviewMode ? 'hidden' : ''}`}>
            <div className="p-4 border-b bg-gray-50"><h2 className="font-bold text-gray-700">Каталог</h2></div>
            <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -476,29 +464,10 @@ const App = () => {
            </div>
         </div>
 
-        {/* WORKSPACE AREA */}
         <div className={`flex-1 bg-gray-200 relative overflow-hidden flex items-center justify-center ${isPreviewMode ? 'bg-white block h-auto p-0 m-0' : ''} print:block print:bg-white print:w-full print:h-auto print:overflow-visible print:static`}>
-            {!isPreviewMode && ( 
-                <div className="absolute top-4 left-4 bg-white p-1.5 rounded shadow flex flex-col gap-2 z-20 screen-only"> 
-                    <button onClick={handleDelete} disabled={!selectedId} className={`p-2 rounded ${!selectedId ? 'text-gray-300' : 'text-red-600 hover:bg-red-50'}`}><Trash2 size={20}/></button> 
-                    <button onClick={handleRotate} disabled={!selectedId || selectedType === 'room'} className={`p-2 rounded ${!selectedId ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'}`}><RotateCw size={20}/></button> 
-                    <div className="h-px bg-gray-200 my-1"></div> 
-                    <button onClick={() => setScale(s => s * 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomIn size={20}/></button> 
-                    <button onClick={() => setScale(s => s / 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomOut size={20}/></button> 
-                </div> 
-            )}
-            
+            {!isPreviewMode && ( <div className="absolute top-4 left-4 bg-white p-1.5 rounded shadow flex flex-col gap-2 z-20 screen-only"> <button onClick={handleDelete} disabled={!selectedId} className={`p-2 rounded ${!selectedId ? 'text-gray-300' : 'text-red-600 hover:bg-red-50'}`}><Trash2 size={20}/></button> <button onClick={handleRotate} disabled={!selectedId || selectedType === 'room'} className={`p-2 rounded ${!selectedId ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'}`}><RotateCw size={20}/></button> <div className="h-px bg-gray-200 my-1"></div> <button onClick={() => setScale(s => s * 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomIn size={20}/></button> <button onClick={() => setScale(s => s / 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomOut size={20}/></button> </div> )}
             <div className={`hidden mb-6 border-b pb-4 ${isPreviewMode ? 'block' : ''} print:block`}> <h1 className="text-3xl font-bold">{projectName}</h1> </div>
-            
-            {showCalibModal && ( 
-                <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center screen-only"> 
-                    <div className="bg-white rounded p-6"> 
-                        <h3>Введіть реальний розмір (мм)</h3> 
-                        <input type="number" value={calibInputMm} onChange={e=>setCalibInputMm(e.target.value)} className="border p-2 w-full my-4"/> 
-                        <button onClick={confirmCalibration} className="bg-blue-600 text-white px-4 py-2 rounded">ОК</button> 
-                    </div> 
-                </div> 
-            )}
+            {showCalibModal && ( <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center screen-only"> <div className="bg-white rounded p-6"> <h3>Введіть реальний розмір (мм)</h3> <input type="number" value={calibInputMm} onChange={e=>setCalibInputMm(e.target.value)} className="border p-2 w-full my-4"/> <button onClick={confirmCalibration} className="bg-blue-600 text-white px-4 py-2 rounded">ОК</button> </div> </div> )}
 
             <div className={`w-full h-full relative overflow-hidden ${isPreviewMode ? 'h-[500px] border border-gray-300 mb-8' : ''} print:h-[500px] print:w-full print:border print:border-gray-300 print:mb-8`} style={{ cursor: activeTool==='hand' || isPanning ? 'grabbing' : activeTool==='room' ? 'crosshair' : 'default' }} onMouseDown={handleMouseDown} onContextMenu={e => e.preventDefault()} onWheel={(e) => { if(e.ctrlKey){e.preventDefault(); setScale(Math.max(0.01, scale - e.deltaY*0.001))} }} onDrop={handleDropOnCanvas} onDragOver={e => e.preventDefault()}>
                 <svg ref={svgRef} width="100%" height="100%" className="block">
@@ -507,13 +476,10 @@ const App = () => {
                         <rect x={-50000} y={-50000} width={100000} height={100000} fill={planImage ? 'none' : 'white'} pointerEvents="none" />
                         {!planImage && <rect x={-50000} y={-50000} width={100000} height={100000} fill="url(#grid)" pointerEvents="none" />}
                         {planImage ? (<g transform={`scale(${planScale})`}><image href={planImage} x={0} y={0} style={{ opacity: 0.9 }} pointerEvents="none" /></g>) : (<g opacity="0.5"><path d="M 0 0 L 5000 0 L 5000 3500 L 0 3500 L 0 0" stroke="#333" strokeWidth="10" fill="white" /><text x="100" y="200" fontSize="100" fill="#999" fontFamily="Arial">Demo Plan (5x3.5m)</text></g>)}
-                        
                         {rooms.map(room => ( <g key={room.id} onClick={(e) => { if(activeTool==='select'){ e.stopPropagation(); setSelectedId(room.id); setSelectedType('room'); } }}> <rect x={room.x} y={room.y} width={room.width} height={room.height} fill={selectedId === room.id ? "rgba(37, 99, 235, 0.2)" : "rgba(37, 99, 235, 0.05)"} stroke="#2563eb" strokeWidth={4/scale} strokeDasharray={`${20/scale} ${10/scale}`} /> <text x={room.x + 10} y={room.y + 40/scale} fontSize={40/scale} fill="#2563eb" fontWeight="bold" pointerEvents="none">{room.name}</text> </g> ))}
                         {currentDrawingRoom && ( <rect x={currentDrawingRoom.x} y={currentDrawingRoom.y} width={currentDrawingRoom.width} height={currentDrawingRoom.height} fill="rgba(37, 99, 235, 0.1)" stroke="#2563eb" strokeWidth={2/scale} /> )}
-                        
                         {items.map(item => ( <g key={item.uniqueId} transform={`translate(${item.x}, ${item.y}) rotate(${item.rotation || 0}, ${item.width/2}, ${item.height/2})`} onMouseDown={e => startItemDrag(e, item)}> <ProductShape item={item} isSelected={selectedId === item.uniqueId} /> </g> ))}
                         {detectedFrames.map((group, i) => { let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity; const series = group[0].series || 'E2'; const color = group[0].color || '#1a1a1a'; group.forEach(item => { const b = getItemBounds(item); minX=Math.min(minX, b.left); minY=Math.min(minY, b.top); maxX=Math.max(maxX, b.right); maxY=Math.max(maxY, b.bottom); }); const pad = (80-71)/2; const extra = series === 'Esprit' ? 7.5 : 0; return ( <g key={`f${i}`} pointerEvents="none"> <rect x={minX-pad-extra} y={minY-pad-extra} width={maxX-minX+pad*2+extra*2} height={maxY-minY+pad*2+extra*2} fill="none" stroke={color} strokeWidth={series==='Esprit'?8:4} rx={series==='E3'?10:2} /> </g> ); })}
-                        
                         {activeTool === 'ruler' && calibrationStep > 0 && !isPreviewMode && calibPointA && ( <g> <circle cx={calibPointA.x} cy={calibPointA.y} r={5/scale} fill="blue"/> {tempMousePos && <line x1={calibPointA.x} y1={calibPointA.y} x2={tempMousePos.x} y2={tempMousePos.y} stroke="blue" strokeWidth={2/scale} />} </g> )}
                         {!isPreviewMode && snapLines.map((l, i) => <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="red" strokeWidth={2/scale} strokeDasharray={`${10/scale} ${10/scale}`} pointerEvents="none"/>)}
                     </g>
