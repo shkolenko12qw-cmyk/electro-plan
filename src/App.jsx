@@ -23,8 +23,10 @@ import {
   Printer, 
   Eye, 
   SquareDashedBottom, 
-  Cloud, 
-  CloudDownload 
+  Cloud,
+  CloudDownload,
+  Lock,
+  Unlock
 } from 'lucide-react';
 
 // --- FIREBASE IMPORTS ---
@@ -39,18 +41,57 @@ try {
 
 // --- MOCK DATA ---
 const PRODUCTS = [
-  { id: 'gira-e2-socket-black', sku: '4188005', name: 'Gira E2 Розетка (Чорний)', category: 'socket', brand: 'Gira', series: 'E2', color: '#1a1a1a', price: 450, width: 71, height: 71, shape: 'socket' },
-  { id: 'gira-e2-switch-black', sku: '0106005', name: 'Gira E2 Вимикач (Чорний)', category: 'switch', brand: 'Gira', series: 'E2', color: '#1a1a1a', price: 520, width: 71, height: 71, shape: 'switch' },
-  { id: 'gira-e2-socket-white', sku: '418804', name: 'Gira E2 Розетка (Білий)', category: 'socket', brand: 'Gira', series: 'E2', color: '#fdfdfd', price: 380, width: 71, height: 71, shape: 'socket' },
-  { id: 'gira-e3-socket-sand', sku: '4188-E3-S', name: 'Gira E3 Розетка (Пісочний)', category: 'socket', brand: 'Gira', series: 'E3', color: '#d6cbb6', price: 550, width: 71, height: 71, shape: 'socket' },
-  { id: 'led-profile-deep', sku: 'PROF-001', name: 'LED Профіль', category: 'light', brand: 'Lumina', series: 'Pro', color: '#cccccc', price: 350, width: 1000, height: 25, shape: 'linear' }
-];
+  // Frames (Gira Esprit Black Aluminium)
+  { id: 'esprit-1', sku: '0211126', name: 'Esprit Рамка 1-м (Чорний алюміній)', category: 'frame', series: 'Esprit', color: '#1a1a1a', price: 70.01, width: 95, height: 95, gangs: 1 },
+  { id: 'esprit-2', sku: '0212126', name: 'Esprit Рамка 2-м (Чорний алюміній)', category: 'frame', series: 'Esprit', color: '#1a1a1a', price: 119.71, width: 166, height: 95, gangs: 2 },
+  { id: 'esprit-3', sku: '0213126', name: 'Esprit Рамка 3-м (Чорний алюміній)', category: 'frame', series: 'Esprit', color: '#1a1a1a', price: 199.58, width: 236.8, height: 95, gangs: 3 },
+  { id: 'esprit-4', sku: '0214126', name: 'Esprit Рамка 4-м (Чорний алюміній)', category: 'frame', series: 'Esprit', color: '#1a1a1a', price: 275.71, width: 308, height: 95, gangs: 4 },
+  
+  // Frames (Gira E2 Black Thermoplastic)
+  { id: 'e2-black-1', sku: '021109', name: 'E2 Рамка 1-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 11.13, width: 80.8, height: 80.8, gangs: 1 },
+  { id: 'e2-black-2', sku: '021209', name: 'E2 Рамка 2-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 16.90, width: 151.9, height: 80.8, gangs: 2 },
+  { id: 'e2-black-3', sku: '021309', name: 'E2 Рамка 3-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 27.79, width: 223.4, height: 80.8, gangs: 3 },
+  { id: 'e2-black-4', sku: '021409', name: 'E2 Рамка 4-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 45.14, width: 294.7, height: 80.8, gangs: 4 },
+  { id: 'e2-black-5', sku: '021509', name: 'E2 Рамка 5-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 68.69, width: 366.0, height: 80.8, gangs: 5 },
 
-const AUTO_FRAMES = {
-    'E2': { 1: { name: 'E2 Рамка 1-п', price: 120 }, 2: { name: 'E2 Рамка 2-п', price: 210 }, 3: { name: 'E2 Рамка 3-п', price: 350 }, 4: { name: 'E2 Рамка 4-п', price: 580 }, 5: { name: 'E2 Рамка 5-п', price: 820 } },
-    'E3': { 1: { name: 'E3 Рамка 1-п', price: 250 }, 2: { name: 'E3 Рамка 2-п', price: 480 }, 3: { name: 'E3 Рамка 3-п', price: 690 }, 4: { name: 'E3 Рамка 4-п', price: 920 }, 5: { name: 'E3 Рамка 5-п', price: 1150 } },
-    'Esprit': { 1: { name: 'Esprit Рамка 1-п', price: 950 }, 2: { name: 'Esprit Рамка 2-п', price: 1800 }, 3: { name: 'Esprit Рамка 3-п', price: 2600 }, 4: { name: 'Esprit Рамка 4-п', price: 3400 }, 5: { name: 'Esprit Рамка 5-п', price: 4200 } }
-};
+  // Mechanisms (System 55)
+  { id: 'sys55-socket-black', sku: '4188005', name: 'Розетка (Чорний матовий)', category: 'socket', brand: 'Gira', series: 'System 55', color: '#1a1a1a', price: 20.65, width: 55, height: 55, shape: 'socket' },
+  { id: 'sys55-socket-ip44', sku: '4454005', name: 'Розетка з кришкою IP44 (Чорний матовий)', category: 'socket', brand: 'Gira', series: 'System 55', color: '#1a1a1a', price: 33.46, width: 55, height: 55, shape: 'socket' },
+  { 
+    id: 'sys55-switch-1g-set', 
+    sku: '3296005', // Артикул клавіші (для фото та відображення)
+    name: 'Вимикач 1-кл (Комплект)', 
+    category: 'switch', 
+    brand: 'Gira', 
+    series: 'System 55', 
+    color: '#1a1a1a', 
+    price: 25.40, 
+    width: 55, 
+    height: 55, 
+    shape: 'switch',
+    bomComponents: [
+      { name: 'Вимикач 1-кл (Механізм)', sku: '310600', price: 12.88 },
+      { name: 'Клавіша 1-кл (Чорний матовий)', sku: '3296005', price: 12.52 }
+    ]
+  },
+  { 
+    id: 'sys55-switch-2g-set', 
+    sku: '3295005', // Артикул клавіші (для фото та відображення)
+    name: 'Вимикач 2-кл (Комплект)', 
+    category: 'switch', 
+    brand: 'Gira', 
+    series: 'System 55', 
+    color: '#1a1a1a', 
+    price: 38.43, 
+    width: 55, 
+    height: 55, 
+    shape: 'switch',
+    bomComponents: [
+      { name: 'Вимикач 2-кл (Механізм)', sku: '310500', price: 20.43 },
+      { name: 'Клавіша 2-кл (Чорний матовий)', sku: '3295005', price: 18.00 }
+    ]
+  },
+];
 
 const getItemBounds = (item) => {
     const w = item.width || 71;
@@ -62,9 +103,73 @@ const getItemBounds = (item) => {
     return { left: item.x, right: item.x + w, top: item.y, bottom: item.y + h, centerX: cx, centerY: cy, width: w, height: h, rotation: rot };
 };
 
-const ProductShape = ({ item, isSelected }) => {
-  const strokeColor = isSelected ? '#3b82f6' : 'transparent';
+const FrameShape = ({ item, isSelected, onSlotClick }) => {
+    const pitch = 71;
+    const slotSize = 55;
+    
+    // Визначаємо орієнтацію рамки (горизонтальна, якщо ширина >= висоти)
+    const isHorizontal = item.width >= item.height;
+
+    const centerX = item.width / 2;
+    const centerY = item.height / 2;
+    
+    // Розрахунок початкової позиції для слотів
+    const startX = isHorizontal ? centerX - ((item.gangs - 1) * pitch) / 2 : centerX;
+    const startY = isHorizontal ? centerY : centerY - ((item.gangs - 1) * pitch) / 2;
+
+    // Шлях до зображення (припускаємо, що файли лежать в public/images/ і мають розширення .jpg)
+    const imagePath = `/images/${item.sku}.jpg`;
+
+    // Логіка для винятку: якщо рамка повернута на ~90 градусів, механізми залишаються горизонтальними
+    const rotation = item.rotation || 0;
+    const normalizedRotation = (rotation % 360 + 360) % 360;
+    const counterRotation = Math.abs(normalizedRotation - 90) <= 2 ? -rotation : 0;
+
+    return (
+        <g>
+            <rect width={item.width} height={item.height} fill={item.color} rx={2} />
+            <image href={imagePath} width={item.width} height={item.height} preserveAspectRatio="none" />
+            {(isSelected || item.isPinned) && <rect width={item.width} height={item.height} fill="none" rx={2} stroke={isSelected ? '#3b82f6' : '#f97316'} strokeWidth={2} strokeDasharray={item.isPinned ? "4 2" : "none"} />}
+            
+            {Array.from({ length: item.gangs }).map((_, i) => {
+                const x = isHorizontal ? startX + i * pitch : startX;
+                const y = isHorizontal ? startY : startY + i * pitch;
+                
+                const mech = item.slots ? item.slots[i] : null;
+                return (
+                    <g key={i} transform={`translate(${x}, ${y})`}>
+                        {/* Slot Hole */}
+                        <rect x={-slotSize/2} y={-slotSize/2} width={slotSize} height={slotSize} fill="#111" rx={1} />
+                        
+                        <g transform={`rotate(${counterRotation})`}>
+                            {mech ? (
+                                <g onClick={(e) => { e.stopPropagation(); onSlotClick(i); }}>
+                                    <rect x={-slotSize/2} y={-slotSize/2} width={slotSize} height={slotSize} fill={mech.color} rx={2} />
+                                    <image href={`/images/${mech.sku}.jpg`} x={-slotSize/2} y={-slotSize/2} width={slotSize} height={slotSize} />
+                                </g>
+                            ) : (
+                                <g onClick={(e) => { e.stopPropagation(); onSlotClick(i); }} style={{ cursor: 'pointer' }}>
+                                    <rect x={-slotSize/2} y={-slotSize/2} width={slotSize} height={slotSize} fill="transparent" stroke="#555" strokeDasharray="4 2" />
+                                    <line x1={0} y1={-8} x2={0} y2={8} stroke="#555" strokeWidth={2} />
+                                    <line x1={-8} y1={0} x2={8} y2={0} stroke="#555" strokeWidth={2} />
+                                </g>
+                            )}
+                        </g>
+                    </g>
+                );
+            })}
+        </g>
+    );
+};
+
+const ProductShape = ({ item, isSelected, onSlotClick }) => {
+  const strokeColor = isSelected ? '#3b82f6' : (item.isPinned ? '#f97316' : 'transparent');
   const isRound = item.series === 'E3';
+  const imagePath = `/images/${item.sku}.jpg`;
+
+  if (item.category === 'frame') {
+      return <FrameShape item={item} isSelected={isSelected} onSlotClick={onSlotClick} />;
+  }
   
   if (item.shape === 'socket') {
     return (
@@ -72,10 +177,11 @@ const ProductShape = ({ item, isSelected }) => {
         {isSelected && (
           <rect x={-2} y={-2} width={item.width + 4} height={item.height + 4} fill="none" stroke={strokeColor} strokeWidth={2} vectorEffect="non-scaling-stroke" rx={isRound ? 8 : 4} />
         )}
+        {item.isPinned && (
+          <rect x={0} y={0} width={item.width} height={item.height} fill="none" stroke="#f97316" strokeWidth={2} strokeDasharray="4 2" rx={isRound ? 6 : 2} />
+        )}
         <rect width={item.width} height={item.height} fill={item.color} rx={isRound ? 6 : 2} />
-        <circle cx={item.width/2} cy={item.height/2} r={24} fill="rgba(0,0,0,0.1)" />
-        <circle cx={item.width/2 - 12} cy={item.height/2} r={4} fill="#222" />
-        <circle cx={item.width/2 + 12} cy={item.height/2} r={4} fill="#222" />
+        <image href={imagePath} width={item.width} height={item.height} />
       </g>
     );
   }
@@ -86,8 +192,11 @@ const ProductShape = ({ item, isSelected }) => {
          {isSelected && (
            <rect x={-2} y={-2} width={item.width + 4} height={item.height + 4} fill="none" stroke={strokeColor} strokeWidth={2} vectorEffect="non-scaling-stroke" rx={isRound ? 8 : 4} />
          )}
+        {item.isPinned && (
+          <rect x={0} y={0} width={item.width} height={item.height} fill="none" stroke="#f97316" strokeWidth={2} strokeDasharray="4 2" rx={isRound ? 6 : 2} />
+        )}
         <rect width={item.width} height={item.height} fill={item.color} rx={isRound ? 6 : 2} />
-        <rect x={6} y={6} width={item.width-12} height={item.height-12} fill="rgba(255,255,255,0.05)" stroke="rgba(0,0,0,0.2)" strokeWidth={1} rx={isRound ? 4 : 1}/>
+        <image href={imagePath} width={item.width} height={item.height} />
       </g>
     );
   }
@@ -98,7 +207,7 @@ const ProductShape = ({ item, isSelected }) => {
 const App = () => {
   const [items, setItems] = useState([]);
   const [rooms, setRooms] = useState([]); 
-  const [selectedId, setSelectedId] = useState(null); 
+  const [selectedIds, setSelectedIds] = useState([]); 
   const [selectedType, setSelectedType] = useState(null); 
   const [planImage, setPlanImage] = useState(null);
   const [projectName, setProjectName] = useState('MyProject');
@@ -114,6 +223,7 @@ const App = () => {
 
   const [draggedProductFromMenu, setDraggedProductFromMenu] = useState(null);
   const [internalDragItem, setInternalDragItem] = useState(null);
+  const [rotationDragItem, setRotationDragItem] = useState(null);
   const [snapLines, setSnapLines] = useState([]);
   
   const [isDrawingRoom, setIsDrawingRoom] = useState(false);
@@ -127,6 +237,9 @@ const App = () => {
   const [calibPixelDist, setCalibPixelDist] = useState(0);
   const [planScale, setPlanScale] = useState(1);
   const [tempMousePos, setTempMousePos] = useState(null); 
+  const [slotModal, setSlotModal] = useState({ isOpen: false, itemId: null, slotIndex: null });
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectionBox, setSelectionBox] = useState(null);
 
   const svgRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -205,44 +318,8 @@ const App = () => {
   };
 
   const { detectedFrames, bom } = useMemo(() => {
-    const mechanizms = items.filter(i => i.category === 'socket' || i.category === 'switch');
-    const visited = new Set();
-    const groups = [];
-
-    mechanizms.forEach(item => {
-        if (visited.has(item.uniqueId)) return;
-        const group = [item];
-        visited.add(item.uniqueId);
-        const queue = [item];
-        while(queue.length > 0) {
-            const current = queue.shift();
-            const currBounds = getItemBounds(current);
-            mechanizms.forEach(candidate => {
-                if (visited.has(candidate.uniqueId)) return;
-                if (candidate.series !== current.series) return;
-                if ((candidate.rotation || 0) !== (current.rotation || 0)) return;
-                const candBounds = getItemBounds(candidate);
-                const rot = (current.rotation || 0) % 180;
-                let isAdjacent = false;
-                const distTolerance = 5; 
-                if (rot === 0) {
-                    const xDist = Math.abs(currBounds.centerX - candBounds.centerX);
-                    const yDist = Math.abs(currBounds.centerY - candBounds.centerY);
-                    if (Math.abs(xDist - FRAME_PITCH) < distTolerance && yDist < distTolerance) isAdjacent = true;
-                } else {
-                    const xDist = Math.abs(currBounds.centerX - candBounds.centerX);
-                    const yDist = Math.abs(currBounds.centerY - candBounds.centerY);
-                    if (Math.abs(yDist - FRAME_PITCH) < distTolerance && xDist < distTolerance) isAdjacent = true;
-                }
-                if (isAdjacent) { 
-                    visited.add(candidate.uniqueId); 
-                    group.push(candidate); 
-                    queue.push(candidate); 
-                }
-            });
-        }
-        groups.push(group);
-    });
+    // Вимкнено автоматичне визначення рамок для нової логіки
+    const groups = []; 
 
     const itemsWithRooms = items.map(item => {
         const bounds = getItemBounds(item);
@@ -273,33 +350,50 @@ const App = () => {
         if (!roomList[name]) roomList[name] = { count: 0, price, sku, isAuto };
         roomList[name].count += 1;
     };
-
-    itemsWithRooms.forEach(item => addToBom(item.name, item.price, item.sku, item.roomName));
     
-    groups.forEach(group => {
-        const count = Math.min(group.length, 5);
-        if(count < 1) return;
-        const series = group[0].series || 'E2';
-        const framesDB = AUTO_FRAMES[series] || AUTO_FRAMES['E2'];
-        const frameData = framesDB[count];
-        const firstItem = itemsWithRooms.find(i => i.uniqueId === group[0].uniqueId);
-        const roomName = firstItem ? firstItem.roomName : 'Нерозподілені';
-        
-        if (frameData) addToBom(frameData.name, frameData.price, '-', roomName, true);
+    const processItemForBom = (item, roomName) => {
+        if (item.bomComponents) {
+            item.bomComponents.forEach(comp => {
+                addToBom(comp.name, comp.price, comp.sku, roomName);
+            });
+        } else {
+            addToBom(item.name, item.price, item.sku, roomName);
+        }
+    };
+
+    itemsWithRooms.forEach(item => {
+        processItemForBom(item, item.roomName);
+        // Якщо це рамка, рахуємо також її вміст
+        if (item.category === 'frame' && item.slots) {
+            item.slots.forEach(mech => {
+                if (mech) processItemForBom(mech, item.roomName);
+            });
+        }
     });
+    
     return { detectedFrames: groups, bom: bomData };
   }, [items, rooms]); 
 
   const handleDelete = () => { 
-      if (selectedType === 'item') setItems(items.filter(i => i.uniqueId !== selectedId)); 
-      else if (selectedType === 'room') setRooms(rooms.filter(r => r.id !== selectedId)); 
-      setSelectedId(null); 
+      if (selectedType === 'item') {
+          const pinned = items.filter(i => selectedIds.includes(i.uniqueId) && i.isPinned);
+          if (pinned.length > 0) return alert("Деякі елементи закріплено! Спочатку відкріпіть їх.");
+          setItems(items.filter(i => !selectedIds.includes(i.uniqueId))); 
+      }
+      else if (selectedType === 'room') setRooms(rooms.filter(r => !selectedIds.includes(r.id))); 
+      setSelectedIds([]); 
       setSelectedType(null); 
   };
   
   const handleRotate = () => { 
       if (selectedType === 'item') {
-          setItems(prev => prev.map(item => item.uniqueId === selectedId ? { ...item, rotation: ((item.rotation || 0) + 90) % 360 } : item)); 
+          setItems(prev => prev.map(i => (selectedIds.includes(i.uniqueId) && !i.isPinned) ? { ...i, rotation: ((i.rotation || 0) + 90) % 360 } : i)); 
+      }
+  };
+
+  const handleTogglePin = () => {
+      if (selectedType === 'item') {
+          setItems(prev => prev.map(item => selectedIds.includes(item.uniqueId) ? { ...item, isPinned: !item.isPinned } : item));
       }
   };
   
@@ -327,7 +421,15 @@ const App = () => {
           setLastMousePos({ x: e.clientX, y: e.clientY }); 
           return; 
       }
-      if (e.target === svgRef.current) { setSelectedId(null); setSelectedType(null); }
+      if (activeTool === 'select' && e.target === svgRef.current) {
+          if (!e.ctrlKey) {
+              setSelectedIds([]);
+              setSelectedType(null);
+          }
+          const pos = screenToWorld(e.clientX, e.clientY);
+          setIsSelecting(true);
+          setSelectionBox({ startX: pos.x, startY: pos.y, x: pos.x, y: pos.y, width: 0, height: 0 });
+      }
   };
 
   const handleMouseMove = (e) => {
@@ -347,41 +449,73 @@ const App = () => {
       }
       if (activeTool === 'ruler' && calibrationStep === 1) { setTempMousePos(screenToWorld(e.clientX, e.clientY)); }
       
+      if (isSelecting && selectionBox) {
+          const pos = screenToWorld(e.clientX, e.clientY);
+          const x = Math.min(pos.x, selectionBox.startX);
+          const y = Math.min(pos.y, selectionBox.startY);
+          const width = Math.abs(pos.x - selectionBox.startX);
+          const height = Math.abs(pos.y - selectionBox.startY);
+          setSelectionBox({ ...selectionBox, x, y, width, height });
+      }
+
+      if (rotationDragItem) {
+          const worldPos = screenToWorld(e.clientX, e.clientY);
+          const dx = worldPos.x - rotationDragItem.centerX;
+          const dy = worldPos.y - rotationDragItem.centerY;
+          
+          // Розраховуємо кут в градусах
+          let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+          
+          // Примагнічування до 15 градусів при натиснутому Shift
+          if (e.shiftKey) {
+              angle = Math.round(angle / 15) * 15;
+          }
+          
+          setItems(prev => prev.map(i => i.uniqueId === rotationDragItem.id ? { ...i, rotation: angle } : i));
+          return;
+      }
+
       if (internalDragItem) {
           const worldPos = screenToWorld(e.clientX, e.clientY);
-          let newX = worldPos.x - internalDragItem.offsetX;
-          let newY = worldPos.y - internalDragItem.offsetY;
-          let centerX = newX + internalDragItem.originalW / 2;
-          let centerY = newY + internalDragItem.originalH / 2;
-          let lines = [];
-          const effectiveThreshold = SNAP_THRESHOLD / scale; 
+          const dx = worldPos.x - internalDragItem.startWorldX;
+          const dy = worldPos.y - internalDragItem.startWorldY;
           
-          items.forEach(other => {
-              if (other.uniqueId === internalDragItem.id) return;
-              const otherBounds = getItemBounds(other);
-              if (Math.abs(centerX - otherBounds.centerX) < effectiveThreshold) { 
-                  centerX = otherBounds.centerX; 
-                  lines.push({ x1: otherBounds.centerX, y1: centerY-200, x2: otherBounds.centerX, y2: centerY+200 }); 
+          setItems(prev => prev.map(i => {
+              if (selectedIds.includes(i.uniqueId)) {
+                  const initial = internalDragItem.initialPositions[i.uniqueId];
+                  if (initial) {
+                      return { ...i, x: initial.x + dx, y: initial.y + dy };
+                  }
               }
-              if (Math.abs(centerY - otherBounds.centerY) < effectiveThreshold) { 
-                  centerY = otherBounds.centerY; 
-                  lines.push({ x1: centerX-200, y1: otherBounds.centerY, x2: centerX+200, y2: otherBounds.centerY }); 
-              }
-              const xDist = centerX - otherBounds.centerX;
-              if (Math.abs(Math.abs(xDist) - FRAME_PITCH) < effectiveThreshold && Math.abs(centerY - otherBounds.centerY) < effectiveThreshold) { 
-                  centerX = otherBounds.centerX + (Math.sign(xDist) * FRAME_PITCH); 
-                  centerY = otherBounds.centerY; 
-              }
-          });
-          setSnapLines(lines);
-          setItems(prev => prev.map(i => i.uniqueId === internalDragItem.id ? { ...i, x: centerX - internalDragItem.originalW/2, y: centerY - internalDragItem.originalH/2 } : i));
+              return i;
+          }));
       }
   };
 
   const handleMouseUp = (e) => {
       setIsPanning(false); 
       setInternalDragItem(null); 
+      setRotationDragItem(null);
       setSnapLines([]);
+      
+      if (isSelecting) {
+          if (selectionBox && selectionBox.width > 0) {
+              const selected = items.filter(i => {
+                  const b = getItemBounds(i);
+                  return b.right >= selectionBox.x && b.left <= selectionBox.x + selectionBox.width &&
+                         b.bottom >= selectionBox.y && b.top <= selectionBox.y + selectionBox.height;
+              }).map(i => i.uniqueId);
+              
+              if (e.ctrlKey) {
+                  setSelectedIds(prev => [...new Set([...prev, ...selected])]);
+              } else {
+                  setSelectedIds(selected);
+              }
+              if (selected.length > 0) setSelectedType('item');
+          }
+          setIsSelecting(false);
+          setSelectionBox(null);
+      }
       
       if (isDrawingRoom && currentDrawingRoom) {
           if (currentDrawingRoom.width > 50 && currentDrawingRoom.height > 50) {
@@ -396,20 +530,97 @@ const App = () => {
   };
 
   const startItemDrag = (e, item) => { 
-      if (activeTool !== 'select' || e.button !== 0) return; 
+      if (e.button !== 0) return; 
       e.stopPropagation(); 
-      const worldPos = screenToWorld(e.clientX, e.clientY); 
-      setInternalDragItem({ id: item.uniqueId, offsetX: worldPos.x - item.x, offsetY: worldPos.y - item.y, originalW: item.width, originalH: item.height }); 
-      setSelectedId(item.uniqueId); 
+      
+      let newSelectedIds = selectedIds;
+      if (e.ctrlKey) {
+          newSelectedIds = selectedIds.includes(item.uniqueId) 
+              ? selectedIds.filter(id => id !== item.uniqueId)
+              : [...selectedIds, item.uniqueId];
+          setSelectedIds(newSelectedIds);
+          setSelectedType('item');
+          return;
+      } else if (!selectedIds.includes(item.uniqueId)) {
+          newSelectedIds = [item.uniqueId];
+          setSelectedIds(newSelectedIds);
+      }
       setSelectedType('item'); 
+
+      // Дозволяємо перетягування тільки в режимі Select і якщо елемент не закріплений
+      if (activeTool === 'select' && !item.isPinned) {
+          const worldPos = screenToWorld(e.clientX, e.clientY); 
+          const initialPositions = {};
+          items.forEach(i => {
+              if (newSelectedIds.includes(i.uniqueId)) initialPositions[i.uniqueId] = { x: i.x, y: i.y };
+          });
+          setInternalDragItem({ 
+              id: item.uniqueId, 
+              startWorldX: worldPos.x, 
+              startWorldY: worldPos.y,
+              initialPositions
+          }); 
+      }
+  };
+
+  const startRotationDrag = (e, item) => {
+      e.stopPropagation();
+      const centerX = item.x + item.width / 2;
+      const centerY = item.y + item.height / 2;
+      setRotationDragItem({
+          id: item.uniqueId,
+          centerX,
+          centerY
+      });
   };
   
   const handleDropOnCanvas = (e) => { 
       e.preventDefault(); 
       if (!draggedProductFromMenu) return; 
       const worldPos = screenToWorld(e.clientX, e.clientY); 
-      setItems([...items, { ...draggedProductFromMenu, uniqueId: Date.now().toString(), rotation: 0, x: worldPos.x - (draggedProductFromMenu.width / 2), y: worldPos.y - (draggedProductFromMenu.height / 2) }]); 
+      
+      const newItem = { 
+          ...draggedProductFromMenu, 
+          uniqueId: Date.now().toString(), 
+          rotation: 0, 
+          x: worldPos.x - (draggedProductFromMenu.width / 2), 
+          y: worldPos.y - (draggedProductFromMenu.height / 2),
+          slots: draggedProductFromMenu.category === 'frame' ? Array(draggedProductFromMenu.gangs).fill(null) : undefined
+      };
+
+      setItems([...items, newItem]); 
       setDraggedProductFromMenu(null); 
+  };
+
+  const handleFileChange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (file.type === 'application/pdf') {
+          try {
+              const pdfjs = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/+esm');
+              pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+              
+              const arrayBuffer = await file.arrayBuffer();
+              const pdf = await pdfjs.getDocument(arrayBuffer).promise;
+              const page = await pdf.getPage(1);
+              const viewport = page.getViewport({ scale: 2 });
+              const canvas = document.createElement('canvas');
+              const context = canvas.getContext('2d');
+              canvas.height = viewport.height;
+              canvas.width = viewport.width;
+              await page.render({ canvasContext: context, viewport: viewport }).promise;
+              
+              setPlanImage(canvas.toDataURL());
+              setPan({x:0,y:0}); setScale(0.2); setPlanScale(1);
+          } catch (err) {
+              alert("Помилка завантаження PDF. Перевірте інтернет або спробуйте зображення.");
+          }
+      } else {
+          const r = new FileReader(); 
+          r.onload = (ev) => { setPlanImage(ev.target.result); setPan({x:0,y:0}); setScale(0.2); setPlanScale(1); }; 
+          r.readAsDataURL(file);
+      }
   };
   
   const handleExportCSV = () => { 
@@ -435,6 +646,20 @@ const App = () => {
       setActiveTool('select'); 
   };
 
+  const handleSlotClick = (itemId, slotIndex) => {
+      setSlotModal({ isOpen: true, itemId, slotIndex });
+  };
+
+  const selectMechanismForSlot = (mech) => {
+      setItems(prev => prev.map(item => {
+          if (item.uniqueId !== slotModal.itemId) return item;
+          const newSlots = [...item.slots];
+          newSlots[slotModal.slotIndex] = mech;
+          return { ...item, slots: newSlots };
+      }));
+      setSlotModal({ isOpen: false, itemId: null, slotIndex: null });
+  };
+
   return (
     <div className={`flex h-screen flex-col bg-gray-100 font-sans text-gray-800 overflow-hidden ${isPreviewMode ? 'print-preview-mode' : ''} print:block print:h-auto print:overflow-visible`} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
       <style>{`@media print { @page { size: auto; margin: 5mm; } html, body, #root { height: auto !important; overflow: visible !important; } .hide-on-print { display: none !important; } } .print-preview-mode .screen-only { display: none !important; } .print-preview-mode .print-content-wrapper { background: white; margin: 20px auto; max-width: 210mm; box-shadow: 0 0 20px rgba(0,0,0,0.1); min-height: 297mm; padding: 10mm; }`}</style>
@@ -452,7 +677,7 @@ const App = () => {
         </div>
         <div className="flex gap-3 items-center">
              <input type="text" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="border border-gray-300 rounded px-2 py-1 text-sm w-32 outline-none" />
-             <input type="file" ref={fileInputRef} onChange={(e) => { const file = e.target.files[0]; if(file) { const r = new FileReader(); r.onload = (ev) => { setPlanImage(ev.target.result); setPan({x:0,y:0}); setScale(0.2); setPlanScale(1); }; r.readAsDataURL(file); } }} className="hidden" />
+             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf" className="hidden" />
             
             <button onClick={saveProject} disabled={isLoading} className="p-2 hover:bg-blue-100 text-blue-600 rounded border border-blue-200 flex items-center gap-1" title="Зберегти в хмару"> {isLoading ? "..." : <Cloud size={18} />} </button>
             <button onClick={loadProject} disabled={isLoading} className="p-2 hover:bg-green-100 text-green-600 rounded border border-green-200 flex items-center gap-1" title="Завантажити з хмари"> {isLoading ? "..." : <CloudDownload size={18} />} </button>
@@ -464,11 +689,30 @@ const App = () => {
 
       {isPreviewMode && ( <div className="fixed top-0 w-full h-14 bg-gray-800 text-white z-50 flex items-center justify-between px-6 shadow screen-only"> <span className="font-bold">Перегляд Друку</span> <div className="flex gap-4"> <button onClick={() => setTimeout(() => window.print(), 100)} className="bg-blue-600 px-4 py-1 rounded flex gap-2 items-center"><Printer size={16}/> Друк</button> <button onClick={() => setIsPreviewMode(false)} className="bg-gray-600 px-4 py-1 rounded">Закрити</button> </div> </div> )}
 
+      {slotModal.isOpen && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center screen-only" onClick={() => setSlotModal({isOpen:false, itemId:null, slotIndex:null})}>
+              <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                  <h3 className="text-lg font-bold mb-4">Оберіть механізм</h3>
+                  <div className="space-y-2">
+                      {PRODUCTS.filter(p => p.category === 'socket' || p.category === 'switch').map(p => (
+                          <div key={p.id} onClick={() => selectMechanismForSlot(p)} className="flex items-center gap-3 p-2 border rounded hover:bg-blue-50 cursor-pointer">
+                              <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-xs">{p.series}</div>
+                              <div><div className="font-medium">{p.name}</div><div className="text-xs text-gray-500">{p.price} ₴</div></div>
+                          </div>
+                      ))}
+                      <button onClick={() => selectMechanismForSlot(null)} className="w-full p-2 text-red-600 border border-red-200 rounded hover:bg-red-50 mt-2">Очистити слот</button>
+                  </div>
+              </div>
+          </div>
+      )}
+
       <div className={`flex flex-1 overflow-hidden relative ${isPreviewMode ? 'print-content-wrapper overflow-visible h-auto block' : ''} print:block print:overflow-visible print:h-auto`}>
         <div className={`w-80 bg-white border-r flex flex-col shadow-lg z-10 select-none screen-only ${isPreviewMode ? 'hidden' : ''}`}>
            <div className="p-4 border-b bg-gray-50"><h2 className="font-bold text-gray-700">Каталог</h2></div>
            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-             {PRODUCTS.map(p => ( <div key={p.id} draggable onDragStart={(e) => { if(activeTool!=='select') setActiveTool('select'); setDraggedProductFromMenu(p); }} className="flex items-center gap-3 p-2 border rounded hover:shadow cursor-grab bg-white"> <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-bold">{p.series}</div> <div className="text-sm"> <div className="font-medium">{p.name}</div> <div className="text-xs text-gray-500">{p.price} ₴</div> </div> </div> ))}
+             {PRODUCTS.filter(p => p.category === 'frame').map(p => ( <div key={p.id} draggable onDragStart={(e) => { if(activeTool!=='select') setActiveTool('select'); setDraggedProductFromMenu(p); }} className="flex items-center gap-3 p-2 border rounded hover:shadow cursor-grab bg-white"> <div className="w-8 h-8 rounded bg-gray-800 text-white flex items-center justify-center text-xs font-bold">{p.gangs}x</div> <div className="text-sm"> <div className="font-medium">{p.name}</div> <div className="text-xs text-gray-500">{p.price} ₴</div> </div> </div> ))}
+             <div className="border-t my-2 pt-2 text-xs text-gray-400 uppercase font-bold">Механізми (для довідки)</div>
+             {PRODUCTS.filter(p => p.category !== 'frame').map(p => ( <div key={p.id} className="flex items-center gap-3 p-2 border rounded opacity-50 bg-gray-50"> <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-bold">{p.series}</div> <div className="text-sm"> <div className="font-medium">{p.name}</div> <div className="text-xs text-gray-500">{p.price} ₴</div> </div> </div> ))}
            </div>
            <div className="h-1/3 border-t bg-gray-50 flex flex-col">
                <div className="p-3 border-b text-sm font-bold flex justify-between"><span>Всього</span><span className="text-blue-600">{bom.total} ₴</span></div>
@@ -477,7 +721,7 @@ const App = () => {
         </div>
 
         <div className={`flex-1 bg-gray-200 relative overflow-hidden flex items-center justify-center ${isPreviewMode ? 'bg-white block h-auto p-0 m-0' : ''} print:block print:bg-white print:w-full print:h-auto print:overflow-visible print:static`}>
-            {!isPreviewMode && ( <div className="absolute top-4 left-4 bg-white p-1.5 rounded shadow flex flex-col gap-2 z-20 screen-only"> <button onClick={handleDelete} disabled={!selectedId} className={`p-2 rounded ${!selectedId ? 'text-gray-300' : 'text-red-600 hover:bg-red-50'}`}><Trash2 size={20}/></button> <button onClick={handleRotate} disabled={!selectedId || selectedType === 'room'} className={`p-2 rounded ${!selectedId ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'}`}><RotateCw size={20}/></button> <div className="h-px bg-gray-200 my-1"></div> <button onClick={() => setScale(s => s * 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomIn size={20}/></button> <button onClick={() => setScale(s => s / 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomOut size={20}/></button> </div> )}
+            {!isPreviewMode && ( <div className="absolute top-4 left-4 bg-white p-1.5 rounded shadow flex flex-col gap-2 z-20 screen-only"> <button onClick={handleDelete} disabled={selectedIds.length === 0} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-red-600 hover:bg-red-50'}`} title="Видалити"><Trash2 size={20}/></button> <button onClick={handleRotate} disabled={selectedIds.length === 0 || selectedType === 'room'} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'}`} title="Обернути"><RotateCw size={20}/></button> <button onClick={handleTogglePin} disabled={selectedIds.length === 0 || selectedType !== 'item'} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-orange-600 hover:bg-orange-50'}`} title="Закріпити/Відкріпити"> {items.find(i => selectedIds.includes(i.uniqueId))?.isPinned ? <Lock size={20}/> : <Unlock size={20}/>} </button> <div className="h-px bg-gray-200 my-1"></div> <button onClick={() => setScale(s => s * 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomIn size={20}/></button> <button onClick={() => setScale(s => s / 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomOut size={20}/></button> </div> )}
             <div className={`hidden mb-6 border-b pb-4 ${isPreviewMode ? 'block' : ''} print:block`}> <h1 className="text-3xl font-bold">{projectName}</h1> </div>
             {showCalibModal && ( <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center screen-only"> <div className="bg-white rounded p-6"> <h3>Введіть реальний розмір (мм)</h3> <input type="number" value={calibInputMm} onChange={e=>setCalibInputMm(e.target.value)} className="border p-2 w-full my-4"/> <button onClick={confirmCalibration} className="bg-blue-600 text-white px-4 py-2 rounded">ОК</button> </div> </div> )}
 
@@ -488,9 +732,24 @@ const App = () => {
                         <rect x={-50000} y={-50000} width={100000} height={100000} fill={planImage ? 'none' : 'white'} pointerEvents="none" />
                         {!planImage && <rect x={-50000} y={-50000} width={100000} height={100000} fill="url(#grid)" pointerEvents="none" />}
                         {planImage ? (<g transform={`scale(${planScale})`}><image href={planImage} x={0} y={0} style={{ opacity: 0.9 }} pointerEvents="none" /></g>) : (<g opacity="0.5"><path d="M 0 0 L 5000 0 L 5000 3500 L 0 3500 L 0 0" stroke="#333" strokeWidth="10" fill="white" /><text x="100" y="200" fontSize="100" fill="#999" fontFamily="Arial">Demo Plan (5x3.5m)</text></g>)}
-                        {rooms.map(room => ( <g key={room.id} onClick={(e) => { if(activeTool==='select'){ e.stopPropagation(); setSelectedId(room.id); setSelectedType('room'); } }}> <rect x={room.x} y={room.y} width={room.width} height={room.height} fill={selectedId === room.id ? "rgba(37, 99, 235, 0.2)" : "rgba(37, 99, 235, 0.05)"} stroke="#2563eb" strokeWidth={4/scale} strokeDasharray={`${20/scale} ${10/scale}`} /> <text x={room.x + 10} y={room.y + 40/scale} fontSize={40/scale} fill="#2563eb" fontWeight="bold" pointerEvents="none">{room.name}</text> </g> ))}
+                        {rooms.map(room => ( <g key={room.id} onClick={(e) => { if(activeTool==='select'){ e.stopPropagation(); setSelectedIds([room.id]); setSelectedType('room'); } }}> <rect x={room.x} y={room.y} width={room.width} height={room.height} fill={selectedIds.includes(room.id) ? "rgba(37, 99, 235, 0.2)" : "rgba(37, 99, 235, 0.05)"} stroke="#2563eb" strokeWidth={4/scale} strokeDasharray={`${20/scale} ${10/scale}`} /> <text x={room.x + 10} y={room.y + 40/scale} fontSize={40/scale} fill="#2563eb" fontWeight="bold" pointerEvents="none">{room.name}</text> </g> ))}
                         {currentDrawingRoom && ( <rect x={currentDrawingRoom.x} y={currentDrawingRoom.y} width={currentDrawingRoom.width} height={currentDrawingRoom.height} fill="rgba(37, 99, 235, 0.1)" stroke="#2563eb" strokeWidth={2/scale} /> )}
-                        {items.map(item => ( <g key={item.uniqueId} transform={`translate(${item.x}, ${item.y}) rotate(${item.rotation || 0}, ${item.width/2}, ${item.height/2})`} onMouseDown={e => startItemDrag(e, item)}> <ProductShape item={item} isSelected={selectedId === item.uniqueId} /> </g> ))}
+                        {selectionBox && <rect x={selectionBox.x} y={selectionBox.y} width={selectionBox.width} height={selectionBox.height} fill="rgba(37, 99, 235, 0.1)" stroke="#2563eb" strokeWidth={1/scale} strokeDasharray="4 2" />}
+                        {items.map(item => {
+                            const isSelected = selectedIds.includes(item.uniqueId);
+                            return (
+                                <g key={item.uniqueId} transform={`translate(${item.x}, ${item.y}) rotate(${item.rotation || 0}, ${item.width/2}, ${item.height/2})`} onMouseDown={e => startItemDrag(e, item)}>
+                                    <ProductShape item={item} isSelected={isSelected} onSlotClick={(slotIdx) => handleSlotClick(item.uniqueId, slotIdx)} />
+                                    {isSelected && !item.isPinned && (
+                                        <g onMouseDown={(e) => startRotationDrag(e, item)} style={{ cursor: 'alias' }}>
+                                            <line x1={item.width/2} y1={0} x2={item.width/2} y2={-35/scale} stroke="#3b82f6" strokeWidth={2/scale} vectorEffect="non-scaling-stroke" strokeDasharray="4 2" />
+                                            <circle cx={item.width/2} cy={-35/scale} r={12/scale} fill="white" stroke="#3b82f6" strokeWidth={2/scale} vectorEffect="non-scaling-stroke" />
+                                            <path d={`M ${item.width/2 - 3/scale} ${-35/scale} L ${item.width/2 + 3/scale} ${-35/scale} M ${item.width/2} ${-38/scale} L ${item.width/2 + 3/scale} ${-35/scale} L ${item.width/2} ${-32/scale}`} fill="none" stroke="#3b82f6" strokeWidth={1.5/scale} vectorEffect="non-scaling-stroke" />
+                                        </g>
+                                    )}
+                                </g>
+                            );
+                        })}
                         {detectedFrames.map((group, i) => { let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity; const series = group[0].series || 'E2'; const color = group[0].color || '#1a1a1a'; group.forEach(item => { const b = getItemBounds(item); minX=Math.min(minX, b.left); minY=Math.min(minY, b.top); maxX=Math.max(maxX, b.right); maxY=Math.max(maxY, b.bottom); }); const pad = (80-71)/2; const extra = series === 'Esprit' ? 7.5 : 0; return ( <g key={`f${i}`} pointerEvents="none"> <rect x={minX-pad-extra} y={minY-pad-extra} width={maxX-minX+pad*2+extra*2} height={maxY-minY+pad*2+extra*2} fill="none" stroke={color} strokeWidth={series==='Esprit'?8:4} rx={series==='E3'?10:2} /> </g> ); })}
                         {activeTool === 'ruler' && calibrationStep > 0 && !isPreviewMode && calibPointA && ( <g> <circle cx={calibPointA.x} cy={calibPointA.y} r={5/scale} fill="blue"/> {tempMousePos && <line x1={calibPointA.x} y1={calibPointA.y} x2={tempMousePos.x} y2={tempMousePos.y} stroke="blue" strokeWidth={2/scale} />} </g> )}
                         {!isPreviewMode && snapLines.map((l, i) => <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="red" strokeWidth={2/scale} strokeDasharray={`${10/scale} ${10/scale}`} pointerEvents="none"/>)}
