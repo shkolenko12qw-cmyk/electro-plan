@@ -30,184 +30,31 @@ import {
   List,
   Map,
   Undo,
-  Redo
+  Redo,
+  FileSpreadsheet,
+  ChevronRight,
+  ChevronDown,
+  BrickWall
 } from 'lucide-react';
 
 // --- FIREBASE IMPORTS ---
 import { supabase } from './supabaseClient';
-
-// --- MOCK DATA ---
-const PRODUCTS = [
-  // Frames (Gira Esprit Black Aluminium)
-  { id: 'esprit-1', sku: '0211126', name: 'Esprit Рамка 1-м (Чорний алюміній)', category: 'frame', series: 'Esprit', color: '#1a1a1a', price: 70.01, width: 95, height: 95, gangs: 1 },
-  { id: 'esprit-2', sku: '0212126', name: 'Esprit Рамка 2-м (Чорний алюміній)', category: 'frame', series: 'Esprit', color: '#1a1a1a', price: 119.71, width: 166, height: 95, gangs: 2 },
-  { id: 'esprit-3', sku: '0213126', name: 'Esprit Рамка 3-м (Чорний алюміній)', category: 'frame', series: 'Esprit', color: '#1a1a1a', price: 199.58, width: 236.8, height: 95, gangs: 3 },
-  { id: 'esprit-4', sku: '0214126', name: 'Esprit Рамка 4-м (Чорний алюміній)', category: 'frame', series: 'Esprit', color: '#1a1a1a', price: 275.71, width: 308, height: 95, gangs: 4 },
-  
-  // Frames (Gira E2 Black Thermoplastic)
-  { id: 'e2-black-1', sku: '021109', name: 'E2 Рамка 1-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 11.13, width: 80.8, height: 80.8, gangs: 1 },
-  { id: 'e2-black-2', sku: '021209', name: 'E2 Рамка 2-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 16.90, width: 151.9, height: 80.8, gangs: 2 },
-  { id: 'e2-black-3', sku: '021309', name: 'E2 Рамка 3-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 27.79, width: 223.4, height: 80.8, gangs: 3 },
-  { id: 'e2-black-4', sku: '021409', name: 'E2 Рамка 4-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 45.14, width: 294.7, height: 80.8, gangs: 4 },
-  { id: 'e2-black-5', sku: '021509', name: 'E2 Рамка 5-м (Чорний матовий)', category: 'frame', series: 'E2', color: '#1a1a1a', price: 68.69, width: 366.0, height: 80.8, gangs: 5 },
-
-  // Mechanisms (System 55)
-  { id: 'sys55-socket-black', sku: '4188005', name: 'Розетка (Чорний матовий)', category: 'socket', brand: 'Gira', series: 'System 55', color: '#1a1a1a', price: 20.65, width: 55, height: 55, shape: 'socket' },
-  { id: 'sys55-socket-ip44', sku: '4454005', name: 'Розетка з кришкою IP44 (Чорний матовий)', category: 'socket', brand: 'Gira', series: 'System 55', color: '#1a1a1a', price: 33.46, width: 55, height: 55, shape: 'socket' },
-  { 
-    id: 'sys55-switch-1g-set', 
-    sku: '3296005', // Артикул клавіші (для фото та відображення)
-    name: 'Вимикач 1-кл (Комплект)', 
-    category: 'switch', 
-    brand: 'Gira', 
-    series: 'System 55', 
-    color: '#1a1a1a', 
-    price: 25.40, 
-    width: 55, 
-    height: 55, 
-    shape: 'switch',
-    bomComponents: [
-      { name: 'Вимикач 1-кл (Механізм)', sku: '310600', price: 12.88 },
-      { name: 'Клавіша 1-кл (Чорний матовий)', sku: '3296005', price: 12.52 }
-    ]
-  },
-  { 
-    id: 'sys55-switch-2g-set', 
-    sku: '3295005', // Артикул клавіші (для фото та відображення)
-    name: 'Вимикач 2-кл (Комплект)', 
-    category: 'switch', 
-    brand: 'Gira', 
-    series: 'System 55', 
-    color: '#1a1a1a', 
-    price: 38.43, 
-    width: 55, 
-    height: 55, 
-    shape: 'switch',
-    bomComponents: [
-      { name: 'Вимикач 2-кл (Механізм)', sku: '310500', price: 20.43 },
-      { name: 'Клавіша 2-кл (Чорний матовий)', sku: '3295005', price: 18.00 }
-    ]
-  },
-];
-
-const getItemBounds = (item) => {
-    const w = item.width || 71;
-    const h = item.height || 71;
-    const rot = item.rotation || 0;
-    if (typeof item.x !== 'number' || typeof item.y !== 'number') return { left: 0, right: 0, top: 0, bottom: 0, centerX: 0, centerY: 0, width: w, height: h, rotation: rot };
-    const cx = item.x + w/2;
-    const cy = item.y + h/2;
-    if (Math.abs(rot % 180) === 90) return { left: cx - h/2, right: cx + h/2, top: cy - w/2, bottom: cy + w/2, centerX: cx, centerY: cy, width: h, height: w, rotation: rot };
-    return { left: item.x, right: item.x + w, top: item.y, bottom: item.y + h, centerX: cx, centerY: cy, width: w, height: h, rotation: rot };
-};
-
-const FrameShape = ({ item, isSelected, onSlotClick }) => {
-    const pitch = 71;
-    const slotSize = 55;
-    
-    // Визначаємо орієнтацію рамки (горизонтальна, якщо ширина >= висоти)
-    const isHorizontal = item.width >= item.height;
-
-    const centerX = item.width / 2;
-    const centerY = item.height / 2;
-    
-    // Розрахунок початкової позиції для слотів
-    const startX = isHorizontal ? centerX - ((item.gangs - 1) * pitch) / 2 : centerX;
-    const startY = isHorizontal ? centerY : centerY - ((item.gangs - 1) * pitch) / 2;
-
-    // Шлях до зображення (припускаємо, що файли лежать в public/images/ і мають розширення .jpg)
-    const imagePath = `/images/${item.sku}.jpg`;
-
-    // Логіка для винятку: якщо рамка повернута на ~90 градусів, механізми залишаються горизонтальними
-    const rotation = item.rotation || 0;
-    const normalizedRotation = (rotation % 360 + 360) % 360;
-    const counterRotation = Math.abs(normalizedRotation - 90) <= 2 ? -rotation : 0;
-
-    return (
-        <g>
-            <rect width={item.width} height={item.height} fill={item.color} rx={2} />
-            <image href={imagePath} width={item.width} height={item.height} preserveAspectRatio="none" />
-            {(isSelected || item.isPinned) && <rect width={item.width} height={item.height} fill="none" rx={2} stroke={isSelected ? '#3b82f6' : '#f97316'} strokeWidth={2} strokeDasharray={item.isPinned ? "4 2" : "none"} />}
-            
-            {Array.from({ length: item.gangs }).map((_, i) => {
-                const x = isHorizontal ? startX + i * pitch : startX;
-                const y = isHorizontal ? startY : startY + i * pitch;
-                
-                const mech = item.slots ? item.slots[i] : null;
-                return (
-                    <g key={i} transform={`translate(${x}, ${y})`}>
-                        {/* Slot Hole */}
-                        <rect x={-slotSize/2} y={-slotSize/2} width={slotSize} height={slotSize} fill="#111" rx={1} />
-                        
-                        <g transform={`rotate(${counterRotation})`}>
-                            {mech ? (
-                                <g onClick={(e) => { e.stopPropagation(); onSlotClick(i); }}>
-                                    <rect x={-slotSize/2} y={-slotSize/2} width={slotSize} height={slotSize} fill={mech.color} rx={2} />
-                                    <image href={`/images/${mech.sku}.jpg`} x={-slotSize/2} y={-slotSize/2} width={slotSize} height={slotSize} />
-                                </g>
-                            ) : (
-                                <g onClick={(e) => { e.stopPropagation(); onSlotClick(i); }} style={{ cursor: 'pointer' }}>
-                                    <rect x={-slotSize/2} y={-slotSize/2} width={slotSize} height={slotSize} fill="transparent" stroke="#555" strokeDasharray="4 2" />
-                                    <line x1={0} y1={-8} x2={0} y2={8} stroke="#555" strokeWidth={2} />
-                                    <line x1={-8} y1={0} x2={8} y2={0} stroke="#555" strokeWidth={2} />
-                                </g>
-                            )}
-                        </g>
-                    </g>
-                );
-            })}
-        </g>
-    );
-};
-
-const ProductShape = ({ item, isSelected, onSlotClick }) => {
-  const strokeColor = isSelected ? '#3b82f6' : (item.isPinned ? '#f97316' : 'transparent');
-  const isRound = item.series === 'E3';
-  const imagePath = `/images/${item.sku}.jpg`;
-
-  if (item.category === 'frame') {
-      return <FrameShape item={item} isSelected={isSelected} onSlotClick={onSlotClick} />;
-  }
-  
-  if (item.shape === 'socket') {
-    return (
-      <g>
-        {isSelected && (
-          <rect x={-2} y={-2} width={item.width + 4} height={item.height + 4} fill="none" stroke={strokeColor} strokeWidth={2} vectorEffect="non-scaling-stroke" rx={isRound ? 8 : 4} />
-        )}
-        {item.isPinned && (
-          <rect x={0} y={0} width={item.width} height={item.height} fill="none" stroke="#f97316" strokeWidth={2} strokeDasharray="4 2" rx={isRound ? 6 : 2} />
-        )}
-        <rect width={item.width} height={item.height} fill={item.color} rx={isRound ? 6 : 2} />
-        <image href={imagePath} width={item.width} height={item.height} />
-      </g>
-    );
-  }
-  
-  if (item.shape === 'switch') {
-    return (
-      <g>
-         {isSelected && (
-           <rect x={-2} y={-2} width={item.width + 4} height={item.height + 4} fill="none" stroke={strokeColor} strokeWidth={2} vectorEffect="non-scaling-stroke" rx={isRound ? 8 : 4} />
-         )}
-        {item.isPinned && (
-          <rect x={0} y={0} width={item.width} height={item.height} fill="none" stroke="#f97316" strokeWidth={2} strokeDasharray="4 2" rx={isRound ? 6 : 2} />
-        )}
-        <rect width={item.width} height={item.height} fill={item.color} rx={isRound ? 6 : 2} />
-        <image href={imagePath} width={item.width} height={item.height} />
-      </g>
-    );
-  }
-  
-  return <rect width={50} height={50} fill="red" />;
-};
+import { INITIAL_PRODUCTS } from './products';
+import { getRoomCenter, getItemBounds, dataURLtoBlob, isPointInPolygon } from './helpers';
+import { ValidationService } from './ValidationService';
+import { BomService } from './BomService';
+import { ProductShape } from './components/ProductShape';
+import { Product, Item, Room } from './types';
 
 const App = () => {
-  const [items, setItems] = useState([]);
-  const [rooms, setRooms] = useState([]); 
-  const [selectedIds, setSelectedIds] = useState([]); 
-  const [selectedType, setSelectedType] = useState(null); 
-  const [planImage, setPlanImage] = useState(null);
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [items, setItems] = useState<Item[]>([]);
+  const [recentProductIds, setRecentProductIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [rooms, setRooms] = useState<Room[]>([]); 
+  const [selectedIds, setSelectedIds] = useState<string[]>([]); 
+  const [selectedType, setSelectedType] = useState<'item' | 'room' | null>(null); 
+  const [planImage, setPlanImage] = useState<string | null>(null);
   const [projectName, setProjectName] = useState('MyProject');
   
   const [scale, setScale] = useState(0.2); 
@@ -221,38 +68,83 @@ const App = () => {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false); 
 
-  const [draggedProductFromMenu, setDraggedProductFromMenu] = useState(null);
+  const [draggedProductFromMenu, setDraggedProductFromMenu] = useState<Product | null>(null);
   const [internalDragItem, setInternalDragItem] = useState(null);
   const [rotationDragItem, setRotationDragItem] = useState(null);
-  const [snapLines, setSnapLines] = useState([]);
+  const [snapLines, setSnapLines] = useState<any[]>([]);
   
   const [isDrawingRoom, setIsDrawingRoom] = useState(false);
-  const [roomStartPos, setRoomStartPos] = useState(null);
+  const [roomStartPos, setRoomStartPos] = useState<{x: number, y: number} | null>(null);
   const [currentDrawingRoom, setCurrentDrawingRoom] = useState(null);
+  const [roomPoints, setRoomPoints] = useState<{ x: number; y: number }[]>([]);
 
   const [calibrationStep, setCalibrationStep] = useState(0); 
-  const [calibPointA, setCalibPointA] = useState(null);
+  const [calibPointA, setCalibPointA] = useState<{x: number, y: number} | null>(null);
   const [showCalibModal, setShowCalibModal] = useState(false);
   const [calibInputMm, setCalibInputMm] = useState(1000);
   const [calibPixelDist, setCalibPixelDist] = useState(0);
   const [planScale, setPlanScale] = useState(1);
-  const [tempMousePos, setTempMousePos] = useState(null); 
+  const [tempMousePos, setTempMousePos] = useState<{x: number, y: number} | null>(null); 
   const [slotModal, setSlotModal] = useState({ isOpen: false, itemId: null, slotIndex: null });
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selectionBox, setSelectionBox] = useState(null);
-  const [activeListRoomId, setActiveListRoomId] = useState(null);
+  const [selectionBox, setSelectionBox] = useState<any>(null);
+  const [activeListRoomId, setActiveListRoomId] = useState<string | null>(null);
   const [newRoomNameInput, setNewRoomNameInput] = useState('');
   const [containerSize, setContainerSize] = useState({ width: 1, height: 1 });
   const [showMinimap, setShowMinimap] = useState(true);
   const [worldSize, setWorldSize] = useState({ width: 5000, height: 3500 });
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<any[]>([]);
   const [historyStep, setHistoryStep] = useState(-1);
+  const [replaceModal, setReplaceModal] = useState<{ isOpen: boolean, itemId: string | null }>({ isOpen: false, itemId: null });
 
   const svgRef = useRef(null);
   const fileInputRef = useRef(null);
   const canvasRef = useRef(null);
+  const catalogInputRef = useRef(null);
   const SNAP_THRESHOLD = 20; 
   const FRAME_PITCH = 71; 
+
+  // --- CATALOG HELPERS ---
+  const addToRecent = (product) => {
+      setRecentProductIds(prev => {
+          const newRecent = [product.id, ...prev.filter(id => id !== product.id)];
+          return newRecent.slice(0, 5);
+      });
+  };
+
+  const groupedProducts = useMemo(() => {
+      const groups = {};
+      
+      const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        p.sku.includes(searchQuery)
+      );
+
+      filtered.forEach(p => {
+          const brand = p.brand || 'Інше';
+          if (!groups[brand]) groups[brand] = { frames: {}, mechanisms: {} };
+          
+          if (p.category === 'frame') {
+              const series = p.series || 'Інше';
+              if (!groups[brand].frames[series]) groups[brand].frames[series] = [];
+              groups[brand].frames[series].push(p);
+          } else {
+              // Mechanisms
+              let func = 'Інше';
+              if (p.category === 'socket') func = 'Розетки';
+              else if (p.category === 'switch') func = 'Вимикачі';
+              
+              if (!groups[brand].mechanisms[func]) groups[brand].mechanisms[func] = [];
+              groups[brand].mechanisms[func].push(p);
+          }
+      });
+      return groups;
+  }, [products]);
+
+  const recentProducts = useMemo(() => {
+      return recentProductIds.map(id => products.find(p => p.id === id)).filter(Boolean);
+  }, [recentProductIds, products]);
+
 
   const screenToWorld = (screenX, screenY) => {
       const svgRect = svgRef.current.getBoundingClientRect();
@@ -319,9 +211,74 @@ const App = () => {
       }
   }, []);
 
+  // --- АВТОМАТИЧНЕ ЗАВАНТАЖЕННЯ ЦІН З КОРЕНЯ (public/prices.xlsx) ---
+  useEffect(() => {
+      const loadPricesFromRoot = async () => {
+          try {
+              // Шукаємо файл prices.xlsx у папці public
+              const response = await fetch('/prices.xlsx');
+              if (!response.ok) return;
+              
+              const buffer = await response.arrayBuffer();
+              const excelModule = await import('https://cdn.jsdelivr.net/npm/exceljs@4.4.0/+esm');
+              const ExcelJS = excelModule.default || excelModule;
+              const workbook = new ExcelJS.Workbook();
+              await workbook.xlsx.load(buffer);
+              const worksheet = workbook.getWorksheet(1);
+              
+              const priceUpdates = {};
+              worksheet.eachRow((row) => {
+                  const sku = row.getCell(1).text?.toString().trim();
+                  const price = parseFloat(row.getCell(2).text?.toString().replace(',', '.').replace(/[^0-9.-]/g, '') || '0');
+                  if (sku && !isNaN(price)) priceUpdates[sku] = price;
+              });
+
+              if (Object.keys(priceUpdates).length > 0) {
+                  setProducts(prev => prev.map(p => priceUpdates[p.sku] !== undefined ? { ...p, price: priceUpdates[p.sku] } : p));
+                  setProducts(prev => prev.map(p => {
+                      let newP = { ...p };
+                      let componentsChanged = false;
+                      
+                      if (priceUpdates[p.sku] !== undefined) newP.price = priceUpdates[p.sku];
+
+                      if (newP.bomComponents) {
+                          newP.bomComponents = newP.bomComponents.map(comp => {
+                              if (priceUpdates[comp.sku] !== undefined) {
+                                  componentsChanged = true;
+                                  return { ...comp, price: priceUpdates[comp.sku] };
+                              }
+                              return comp;
+                          });
+                          if (componentsChanged && priceUpdates[p.sku] === undefined) newP.price = newP.bomComponents.reduce((sum, c) => sum + c.price, 0);
+                      }
+                      return newP;
+                  }));
+                  
+                  setItems(prev => prev.map(item => {
+                      let newItem = { ...item };
+                      if (priceUpdates[item.sku] !== undefined) {
+                          newItem.price = priceUpdates[item.sku];
+                      }
+                      if (newItem.bomComponents) {
+                          newItem.bomComponents = newItem.bomComponents.map(comp => {
+                              if (priceUpdates[comp.sku] !== undefined) {
+                                  return { ...comp, price: priceUpdates[comp.sku] };
+                              }
+                              return comp;
+                          });
+                      }
+                      return newItem;
+                  }));
+              }
+          } catch (e) { console.error("Помилка автозавантаження цін:", e); }
+      };
+      loadPricesFromRoot();
+  }, []);
+
   // Гарячі клавіші Ctrl+Z / Ctrl+Y
   useEffect(() => {
       const handleKeyDown = (e) => {
+          // Undo/Redo
           if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
               e.preventDefault();
               handleUndo();
@@ -329,6 +286,10 @@ const App = () => {
           if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
               e.preventDefault();
               handleRedo();
+          }
+          // Видалення вибраного
+          if ((e.key === 'Delete' || e.key === 'Backspace') && selectedIds.length > 0 && activeTool === 'select') {
+              if (e.target.tagName !== 'INPUT') handleDelete();
           }
       };
       window.addEventListener('keydown', handleKeyDown);
@@ -404,7 +365,8 @@ const App = () => {
 
           if (data) {
               const loaded = data.content;
-              setItems(loaded.items || []);
+              // Оновлюємо ціни завантажених товарів згідно з поточним каталогом
+              setItems(syncItemsWithCatalog(loaded.items || []));
               setRooms(loaded.rooms || []);
               setPlanImage(loaded.planImage || null);
               setPlanScale(loaded.planScale || 1);
@@ -423,74 +385,8 @@ const App = () => {
   };
 
   const { detectedFrames, bom } = useMemo(() => {
-    // Вимкнено автоматичне визначення рамок для нової логіки
-    const groups = []; 
-    
-    // Фільтруємо механізми, які розміщені на плані, для визначення рамок (якщо потрібно в майбутньому)
-    // const mechanizmsOnPlan = items.filter(i => typeof i.x === 'number');
-
-    const itemsWithRooms = items.map(item => {
-        // Якщо товар додано через режим "Списком" (має assignedRoomId)
-        if (item.assignedRoomId) {
-            const room = rooms.find(r => r.id === item.assignedRoomId);
-            return { 
-                ...item, 
-                roomId: item.assignedRoomId, 
-                roomName: room ? room.name : 'Нерозподілені' 
-            };
-        }
-
-        // Якщо товар на плані - визначаємо кімнату геометрично
-        const bounds = getItemBounds(item);
-        const room = rooms.find(r => 
-            r.width && r.height && // Перевіряємо, чи це кімната з координатами
-            bounds.centerX >= r.x && bounds.centerX <= r.x + r.width && 
-            bounds.centerY >= r.y && bounds.centerY <= r.y + r.height
-        );
-        return { 
-            ...item, 
-            roomId: room ? room.id : 'unassigned', 
-            roomName: room ? room.name : 'Нерозподілені' 
-        };
-    });
-
-    const bomData = { items: {}, total: 0, byRoom: {} };
-    
-    const addToBom = (name, price, sku, roomName, isAuto = false) => {
-        bomData.total += price;
-        
-        // Заповнюємо загальний список для CSV
-        if (!bomData.items[name]) bomData.items[name] = { count: 0, price, sku };
-        bomData.items[name].count += 1;
-
-        if (!bomData.byRoom[roomName]) bomData.byRoom[roomName] = {};
-        const roomList = bomData.byRoom[roomName];
-        if (!roomList[name]) roomList[name] = { count: 0, price, sku, isAuto };
-        roomList[name].count += 1;
-    };
-    
-    const processItemForBom = (item, roomName) => {
-        if (item.bomComponents) {
-            item.bomComponents.forEach(comp => {
-                addToBom(comp.name, comp.price, comp.sku, roomName);
-            });
-        } else {
-            addToBom(item.name, item.price, item.sku, roomName);
-        }
-    };
-
-    itemsWithRooms.forEach(item => {
-        processItemForBom(item, item.roomName);
-        // Якщо це рамка, рахуємо також її вміст
-        if (item.category === 'frame' && item.slots) {
-            item.slots.forEach(mech => {
-                if (mech) processItemForBom(mech, item.roomName);
-            });
-        }
-    });
-    
-    return { detectedFrames: groups, bom: bomData };
-  }, [items, rooms]); 
+    return BomService.calculate(items, rooms, products);
+  }, [items, rooms, products]); 
 
   const handleDelete = () => { 
       if (selectedType === 'item') {
@@ -516,6 +412,80 @@ const App = () => {
           setItems(newItems); 
           addToHistory(newItems, rooms, planImage, planScale);
       }
+  };
+
+  const updateWallType = (type: 'brick' | 'gypsum') => {
+      if (selectedType === 'item') {
+          const newItems = items.map(i => selectedIds.includes(i.uniqueId) ? { ...i, wallType: type } : i);
+          setItems(newItems);
+          addToHistory(newItems, rooms, planImage, planScale);
+      }
+  };
+
+  // Функція для оновлення цін у списку товарів відповідно до актуального каталогу
+  const syncItemsWithCatalog = (itemsToSync: Item[]) => {
+      return itemsToSync.map(item => {
+          const catalogProduct = products.find(p => p.sku === item.sku);
+          if (catalogProduct) {
+              return {
+                  ...item,
+                  price: catalogProduct.price,
+                  bomComponents: catalogProduct.bomComponents ? JSON.parse(JSON.stringify(catalogProduct.bomComponents)) : undefined
+              };
+          }
+          return item;
+      });
+  };
+
+  const handleReplaceApply = (newProduct: Product, scope: 'single' | 'room') => {
+      const targetItem = items.find(i => i.uniqueId === replaceModal.itemId);
+      if (!targetItem) return;
+
+      let idsToUpdate = [targetItem.uniqueId];
+
+      if (scope === 'room') {
+          // Helper to find room for an item
+          const getRoomId = (item: Item) => {
+              if (item.assignedRoomId) return item.assignedRoomId;
+              const b = getItemBounds(item);
+              const foundRoom = rooms.find(r => {
+                  if (r.points && r.points.length > 2) return isPointInPolygon({ x: b.centerX, y: b.centerY }, r.points);
+                  return r.width && r.height && r.x !== undefined && r.y !== undefined && b.centerX >= r.x && b.centerX <= r.x + r.width && b.centerY >= r.y && b.centerY <= r.y + r.height;
+              });
+              return foundRoom ? foundRoom.id : null;
+          };
+
+          const targetRoomId = getRoomId(targetItem);
+
+          if (targetRoomId) {
+              const siblings = items.filter(i => 
+                  i.uniqueId !== targetItem.uniqueId &&
+                  i.category === targetItem.category &&
+                  i.series === targetItem.series &&
+                  i.shape === targetItem.shape &&
+                  (i.category !== 'frame' || i.gangs === targetItem.gangs) &&
+                  getRoomId(i) === targetRoomId
+              );
+              idsToUpdate = [...idsToUpdate, ...siblings.map(s => s.uniqueId)];
+          }
+      }
+
+      const newItems = items.map(i => {
+          if (idsToUpdate.includes(i.uniqueId)) {
+              return {
+                  ...i,
+                  ...newProduct,
+                  uniqueId: i.uniqueId,
+                  x: i.x, y: i.y, rotation: i.rotation, isPinned: i.isPinned, assignedRoomId: i.assignedRoomId,
+                  slots: i.slots, wallType: i.wallType
+              };
+          }
+          return i;
+      });
+
+      setItems(newItems);
+      addToHistory(newItems, rooms, planImage, planScale);
+      setReplaceModal({ isOpen: false, itemId: null });
   };
 
   // Оновлюємо розміри контейнера при зміні вікна
@@ -576,10 +546,26 @@ const App = () => {
   const handleMouseDown = (e) => {
       if (isPreviewMode) return;
       if (activeTool === 'room' && e.button === 0) { 
-          const pos = screenToWorld(e.clientX, e.clientY); 
-          setIsDrawingRoom(true); 
-          setRoomStartPos(pos); 
-          setCurrentDrawingRoom({ x: pos.x, y: pos.y, width: 0, height: 0 }); 
+          const pos = screenToWorld(e.clientX, e.clientY);
+          
+          // Перевірка на замикання полігону (клік по першій точці)
+          if (roomPoints.length > 2) {
+              const first = roomPoints[0];
+              const dist = Math.sqrt(Math.pow(pos.x - first.x, 2) + Math.pow(pos.y - first.y, 2));
+              if (dist < 20 / scale) {
+                  const name = prompt("Введіть назву кімнати:", "Нова кімната");
+                  if (name) {
+                      const newRooms = [...rooms, { id: Date.now().toString(), name, points: [...roomPoints] }];
+                      setRooms(newRooms);
+                      addToHistory(items, newRooms, planImage, planScale);
+                  }
+                  setRoomPoints([]);
+                  setIsDrawingRoom(false);
+                  return;
+              }
+          }
+          setRoomPoints([...roomPoints, pos]);
+          setIsDrawingRoom(true);
           return; 
       }
       if (activeTool === 'ruler' && e.button === 0) {
@@ -588,6 +574,7 @@ const App = () => {
               setCalibPointA(pos); 
               setCalibrationStep(1); 
           } else if (calibrationStep === 1) { 
+              setTempMousePos(pos);
               setShowCalibModal(true); 
           }
           return;
@@ -625,14 +612,8 @@ const App = () => {
           setLastMousePos({ x: e.clientX, y: e.clientY }); 
           return; 
       }
-      if (isDrawingRoom && roomStartPos) { 
-          const pos = screenToWorld(e.clientX, e.clientY); 
-          const x = Math.min(pos.x, roomStartPos.x); 
-          const y = Math.min(pos.y, roomStartPos.y); 
-          setCurrentDrawingRoom({ x, y, width: Math.abs(pos.x - roomStartPos.x), height: Math.abs(pos.y - roomStartPos.y) }); 
-          return; 
-      }
-      if (activeTool === 'ruler' && calibrationStep === 1) { setTempMousePos(screenToWorld(e.clientX, e.clientY)); }
+      if (isDrawingRoom) { setTempMousePos(screenToWorld(e.clientX, e.clientY)); }
+      if (activeTool === 'ruler' && calibrationStep === 1 && !showCalibModal) { setTempMousePos(screenToWorld(e.clientX, e.clientY)); }
       
       if (isSelecting && selectionBox) {
           const pos = screenToWorld(e.clientX, e.clientY);
@@ -707,20 +688,6 @@ const App = () => {
           setSelectionBox(null);
       }
       
-      if (isDrawingRoom && currentDrawingRoom) {
-          if (currentDrawingRoom.width > 50 && currentDrawingRoom.height > 50) {
-              const name = prompt("Введіть назву кімнати:", "Нова кімната");
-              if (name) {
-                  const newRooms = [...rooms, { ...currentDrawingRoom, id: Date.now().toString(), name }];
-                  setRooms(newRooms);
-                  addToHistory(items, newRooms, planImage, planScale);
-              }
-          }
-          setIsDrawingRoom(false); 
-          setCurrentDrawingRoom(null); 
-          setRoomStartPos(null); 
-          setActiveTool('select'); 
-      }
   };
 
   const startItemDrag = (e, item) => { 
@@ -779,13 +746,15 @@ const App = () => {
           rotation: 0, 
           x: worldPos.x - (draggedProductFromMenu.width / 2), 
           y: worldPos.y - (draggedProductFromMenu.height / 2),
-          slots: draggedProductFromMenu.category === 'frame' ? Array(draggedProductFromMenu.gangs).fill(null) : undefined
+          slots: draggedProductFromMenu.category === 'frame' ? Array(draggedProductFromMenu.gangs).fill(null) : undefined,
+          wallType: draggedProductFromMenu.series === 'E2 Flat' ? 'brick' : undefined
       };
 
       const newItems = [...items, newItem];
       setItems(newItems); 
       addToHistory(newItems, rooms, planImage, planScale);
       setDraggedProductFromMenu(null); 
+      addToRecent(draggedProductFromMenu);
   };
 
   const handleCatalogItemClick = (product) => {
@@ -796,11 +765,13 @@ const App = () => {
               uniqueId: Date.now().toString(),
               assignedRoomId: activeListRoomId,
               rotation: 0,
-              slots: product.category === 'frame' ? Array(product.gangs).fill(null) : undefined
+              slots: product.category === 'frame' ? Array(product.gangs).fill(null) : undefined,
+              wallType: product.series === 'E2 Flat' ? 'brick' : undefined
           };
           const newItems = [...items, newItem];
           setItems(newItems);
           addToHistory(newItems, rooms, planImage, planScale);
+          addToRecent(product);
       }
   };
 
@@ -827,7 +798,7 @@ const App = () => {
               const newImage = canvas.toDataURL();
               setPlanImage(newImage);
               setPan({x:0,y:0}); setScale(0.2); setPlanScale(1);
-              addToHistory(items, rooms, newImage, 1);
+              addToHistory(items, rooms, newImage, 1); // Тут items не змінюються, тому синхронізація не потрібна
           } catch (err) {
               alert("Помилка завантаження PDF. Перевірте інтернет або спробуйте зображення.");
           }
@@ -840,7 +811,9 @@ const App = () => {
                   const newImage = ev.target.result;
                   setPlanImage(newImage); 
                   setPan({x:0,y:0}); setScale(0.2); setPlanScale(1); 
-                  addToHistory(items, rooms, newImage, 1);
+                  // Якщо це завантаження JSON проекту (якщо ви додасте таку можливість), тут теж варто використати syncItemsWithCatalog
+                  // Але для зображень items залишаються поточними
+                  addToHistory(items, rooms, newImage, 1); 
               };
               img.src = ev.target.result;
           }; 
@@ -856,16 +829,187 @@ const App = () => {
       link.download = "bom.csv"; 
       link.click(); 
   };
+
+  const handleImportCatalog = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+          const excelModule = await import('https://cdn.jsdelivr.net/npm/exceljs@4.4.0/+esm');
+          const ExcelJS = excelModule.default || excelModule;
+          const workbook = new ExcelJS.Workbook();
+          await workbook.xlsx.load(await file.arrayBuffer());
+          const worksheet = workbook.getWorksheet(1);
+
+          const priceUpdates = {};
+          
+          worksheet.eachRow((row, rowNumber) => {
+              // Очікуємо: A=Артикул, B=Ціна
+              const sku = row.getCell(1).text ? row.getCell(1).text.toString().trim() : '';
+              let priceStr = row.getCell(2).text ? row.getCell(2).text.toString().replace(',', '.') : '0';
+              priceStr = priceStr.replace(/[^0-9.-]/g, '');
+              const price = parseFloat(priceStr);
+              
+              if (sku && !isNaN(price)) {
+                  priceUpdates[sku] = price;
+              }
+          });
+
+          // 1. Оновлюємо каталог
+          setProducts(prev => prev.map(p => {
+              let newP = { ...p };
+              let componentsChanged = false;
+              
+              if (priceUpdates[p.sku] !== undefined) newP.price = priceUpdates[p.sku];
+
+              if (newP.bomComponents) {
+                  newP.bomComponents = newP.bomComponents.map(comp => {
+                      if (priceUpdates[comp.sku] !== undefined) {
+                          componentsChanged = true;
+                          return { ...comp, price: priceUpdates[comp.sku] };
+                      }
+                      return comp;
+                  });
+                  if (componentsChanged && priceUpdates[p.sku] === undefined) newP.price = newP.bomComponents.reduce((sum, c) => sum + c.price, 0);
+              }
+              return newP;
+          }));
+
+          // 2. Оновлюємо товари на плані
+          setItems(prev => prev.map(item => {
+              let newItem = { ...item };
+              if (priceUpdates[item.sku] !== undefined) {
+                  newItem.price = priceUpdates[item.sku];
+              }
+              if (newItem.bomComponents) {
+                  newItem.bomComponents = newItem.bomComponents.map(comp => {
+                      if (priceUpdates[comp.sku] !== undefined) {
+                          return { ...comp, price: priceUpdates[comp.sku] };
+                      }
+                      return comp;
+                  });
+              }
+              return newItem;
+          }));
+
+          alert(`Ціни оновлено для ${Object.keys(priceUpdates).length} артикулів.`);
+      } catch (error) {
+          console.error('Price update error:', error);
+          alert('Помилка оновлення цін. Перевірте формат файлу (xlsx).');
+      }
+  };
+
+  const handleExportExcel = async () => {
+      try {
+          const excelModule = await import('https://cdn.jsdelivr.net/npm/exceljs@4.4.0/+esm');
+          const ExcelJS = excelModule.default || excelModule;
+          const workbook = new ExcelJS.Workbook();
+          const worksheet = workbook.addWorksheet('Специфікація');
+
+          // Налаштування колонок
+          worksheet.columns = [
+              { header: '№', key: 'id', width: 5 },
+              { header: 'Артикул', key: 'sku', width: 15 },
+              { header: 'Назва', key: 'name', width: 40 },
+              { header: 'Кількість', key: 'quantity', width: 10 },
+              { header: 'Ціна', key: 'price', width: 12 },
+              { header: 'Сума', key: 'sum', width: 12 },
+          ];
+
+          // Стилізація шапки
+          const headerRow = worksheet.getRow(1);
+          headerRow.font = { bold: true };
+          headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+          let globalIdx = 1;
+          let totalSum = 0;
+
+          // Проходимо по кімнатах
+          for (const [roomName, items] of Object.entries(bom.byRoom)) {
+              // Рядок кімнати
+              const roomRow = worksheet.addRow([roomName]);
+              roomRow.font = { bold: true, size: 12 };
+              roomRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEEEEE' } };
+              worksheet.mergeCells(`A${roomRow.number}:F${roomRow.number}`);
+
+              // Підготовка та сортування товарів (Механізми -> Рамки)
+              const roomItemsArr = Object.entries(items).map(([name, data]) => {
+                  let isFrame = name.toLowerCase().includes('рамка');
+                  const product = products.find(p => p.sku === data.sku);
+                  if (product && product.category === 'frame') isFrame = true;
+                  return { name, ...data, isFrame };
+              });
+
+              roomItemsArr.sort((a, b) => (a.isFrame === b.isFrame) ? 0 : a.isFrame ? 1 : -1);
+
+              roomItemsArr.forEach(item => {
+                  const row = worksheet.addRow({
+                      id: globalIdx++,
+                      sku: item.sku,
+                      name: item.name,
+                      quantity: item.count,
+                      price: item.price,
+                      sum: item.count * item.price
+                  });
+                  row.getCell('price').numFmt = '#,##0.00';
+                  row.getCell('sum').numFmt = '#,##0.00';
+                  totalSum += item.count * item.price;
+              });
+          }
+
+          // Підсумок
+          worksheet.addRow([]);
+          const totalRow = worksheet.addRow(['', '', '', '', 'Разом:', totalSum]);
+          totalRow.font = { bold: true };
+          totalRow.getCell('sum').numFmt = '#,##0.00';
+
+          // Збереження
+          const buffer = await workbook.xlsx.writeBuffer();
+          const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `${projectName}_specification.xlsx`;
+          link.click();
+      } catch (error) {
+          console.error('Excel export error:', error);
+          alert('Помилка експорту в Excel. Переконайтеся, що встановлено пакет exceljs (npm install exceljs).');
+      }
+  };
   
   const confirmCalibration = () => { 
       const realMm = parseFloat(calibInputMm); 
-      if (!isNaN(realMm) && realMm > 0) { 
-          const dx = tempMousePos.x - calibPointA.x; 
-          const dy = tempMousePos.y - calibPointA.y; 
-          const dist = Math.sqrt(dx*dx + dy*dy); 
-          const newScale = planScale * (realMm / dist);
+      if (!isNaN(realMm) && realMm > 0 && tempMousePos && calibPointA) { 
+          // Розраховуємо дистанцію в "чистих" пікселях зображення (без врахування planScale)
+          const dx = (tempMousePos.x - calibPointA.x) / planScale; 
+          const dy = (tempMousePos.y - calibPointA.y) / planScale; 
+          const pixelDist = Math.sqrt(dx*dx + dy*dy); 
+          
+          if (pixelDist === 0) return;
+
+          const newScale = realMm / pixelDist; // Абсолютний масштаб: скільки мм в одному пікселі
+          const ratio = newScale / planScale;  // Коефіцієнт зміни для існуючих об'єктів
+
+          // Масштабуємо позиції всіх товарів на плані
+          const updatedItems = items.map(item => ({
+              ...item,
+              x: typeof item.x === 'number' ? item.x * ratio : item.x,
+              y: typeof item.y === 'number' ? item.y * ratio : item.y
+          }));
+
+          // Масштабуємо координати та розміри всіх кімнат
+          const updatedRooms = rooms.map(room => ({
+              ...room,
+              x: typeof room.x === 'number' ? room.x * ratio : room.x,
+              y: typeof room.y === 'number' ? room.y * ratio : room.y,
+              width: typeof room.width === 'number' ? room.width * ratio : room.width,
+              height: typeof room.height === 'number' ? room.height * ratio : room.height,
+              points: room.points ? room.points.map(p => ({ x: p.x * ratio, y: p.y * ratio })) : room.points
+          }));
+
+          setItems(updatedItems);
+          setRooms(updatedRooms);
           setPlanScale(newScale); 
-          addToHistory(items, rooms, planImage, newScale);
+          addToHistory(updatedItems, updatedRooms, planImage, newScale);
       } 
       setShowCalibModal(false); 
       setCalibrationStep(0); 
@@ -878,6 +1022,12 @@ const App = () => {
   };
 
   const selectMechanismForSlot = (mech) => {
+      const frame = items.find(i => i.uniqueId === slotModal.itemId);
+      if (mech && !ValidationService.isCompatible(frame, mech)) {
+          alert(`Увага! Механізм ${mech.name} може бути несумісним із рамкою ${frame.series}`);
+          // Можна або перервати, або просто попередити
+      }
+
       const newItems = items.map(item => {
           if (item.uniqueId !== slotModal.itemId) return item;
           const newSlots = [...item.slots];
@@ -927,6 +1077,9 @@ const App = () => {
           const newPanX = mouseX - (mouseX - currentPan.x) * (newScale / currentScale);
           const newPanY = mouseY - (mouseY - currentPan.y) * (newScale / currentScale);
 
+          // Оновлюємо ref миттєво, щоб уникнути "смикання" при швидкому скролі
+          transformRef.current = { scale: newScale, pan: { x: newPanX, y: newPanY } };
+
           setScale(newScale);
           setPan({ x: newPanX, y: newPanY });
       };
@@ -934,6 +1087,20 @@ const App = () => {
       canvas.addEventListener('wheel', handleWheel, { passive: false });
       return () => canvas.removeEventListener('wheel', handleWheel);
   }, []);
+
+  const renderCatalogItem = (p) => (
+      <div key={p.id} draggable onDragStart={(e) => { if(activeTool!=='select') setActiveTool('select'); setDraggedProductFromMenu(p); }} onClick={() => handleCatalogItemClick(p)} className="flex items-center gap-3 p-2 border rounded hover:shadow cursor-grab bg-white active:bg-blue-50 mb-2">
+          {p.category === 'frame' ? (
+              <div className="w-8 h-8 rounded bg-gray-800 text-white flex items-center justify-center text-xs font-bold">{p.gangs}x</div>
+          ) : (
+              <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-bold" style={{backgroundColor: p.color, color: p.color === '#1a1a1a' ? 'white' : 'black'}}>{p.series ? p.series.substring(0,2) : 'M'}</div>
+          )}
+          <div className="text-sm">
+              <div className="font-medium line-clamp-2">{p.name}</div>
+              <div className="text-xs text-gray-500">{p.price} ₴</div>
+          </div>
+      </div>
+  );
 
   return (
     <div className={`flex h-screen flex-col bg-gray-100 font-sans text-gray-800 overflow-hidden ${isPreviewMode ? 'print-preview-mode' : ''} print:block print:h-auto print:overflow-visible`} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove}>
@@ -967,12 +1134,15 @@ const App = () => {
         <div className="flex gap-3 items-center">
              <input type="text" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="border border-gray-300 rounded px-2 py-1 text-sm w-32 outline-none" />
              <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf" className="hidden" />
+             <input type="file" ref={catalogInputRef} onChange={handleImportCatalog} accept=".xlsx" className="hidden" />
+             <button onClick={() => catalogInputRef.current.click()} className="p-2 hover:bg-yellow-100 text-yellow-700 rounded border border-yellow-200" title="Оновити ціни (Excel)"> <List size={18} /> </button>
              <button onClick={() => fileInputRef.current.click()} className="p-2 hover:bg-gray-100 rounded" title="Завантажити план"> <Upload size={18} /> </button>
             
             <button onClick={saveProject} disabled={isLoading} className="p-2 hover:bg-blue-100 text-blue-600 rounded border border-blue-200 flex items-center gap-1" title="Зберегти в хмару"> {isLoading ? "..." : <Cloud size={18} />} </button>
             <button onClick={loadProject} disabled={isLoading} className="p-2 hover:bg-green-100 text-green-600 rounded border border-green-200 flex items-center gap-1" title="Завантажити з хмари"> {isLoading ? "..." : <CloudDownload size={18} />} </button>
             
             <button onClick={handleExportCSV} className="p-2 hover:bg-gray-100 rounded" title="Завантажити CSV"> <Download size={18} /> </button>
+            <button onClick={handleExportExcel} className="p-2 hover:bg-green-100 text-green-700 rounded" title="Експорт в Excel"> <FileSpreadsheet size={18} /> </button>
             <button onClick={() => setIsPreviewMode(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded text-sm shadow"> <Eye size={16} /> Перегляд / PDF </button>
         </div>
       </header>
@@ -984,7 +1154,7 @@ const App = () => {
               <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                   <h3 className="text-lg font-bold mb-4">Оберіть механізм</h3>
                   <div className="space-y-2">
-                      {PRODUCTS.filter(p => p.category === 'socket' || p.category === 'switch').map(p => (
+                      {products.filter(p => p.category === 'socket' || p.category === 'switch').map(p => (
                           <div key={p.id} onClick={() => selectMechanismForSlot(p)} className="flex items-center gap-3 p-2 border rounded hover:bg-blue-50 cursor-pointer">
                               <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-xs">{p.series}</div>
                               <div><div className="font-medium">{p.name}</div><div className="text-xs text-gray-500">{p.price} ₴</div></div>
@@ -999,10 +1169,65 @@ const App = () => {
       <div className={`flex flex-1 overflow-hidden relative ${isPreviewMode ? 'print-content-wrapper overflow-visible h-auto block' : ''} print:block print:overflow-visible print:h-auto`}>
         <div className={`w-80 bg-white border-r flex flex-col shadow-lg z-10 select-none screen-only ${isPreviewMode ? 'hidden' : ''}`}>
            <div className="p-4 border-b bg-gray-50"><h2 className="font-bold text-gray-700">Каталог</h2></div>
+           
+           {/* Пошук */}
+           <div className="p-3 border-b">
+               <div className="relative">
+                   <input type="text" placeholder="Пошук за назвою або SKU..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-8 pr-2 py-1.5 text-sm border rounded-md outline-none focus:ring-2 focus:ring-blue-500" />
+                   <MousePointer2 size={14} className="absolute left-2.5 top-2.5 text-gray-400" />
+               </div>
+           </div>
+
            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-             {PRODUCTS.filter(p => p.category === 'frame').map(p => ( <div key={p.id} draggable onDragStart={(e) => { if(activeTool!=='select') setActiveTool('select'); setDraggedProductFromMenu(p); }} onClick={() => handleCatalogItemClick(p)} className="flex items-center gap-3 p-2 border rounded hover:shadow cursor-grab bg-white active:bg-blue-50"> <div className="w-8 h-8 rounded bg-gray-800 text-white flex items-center justify-center text-xs font-bold">{p.gangs}x</div> <div className="text-sm"> <div className="font-medium">{p.name}</div> <div className="text-xs text-gray-500">{p.price} ₴</div> </div> </div> ))}
-             <div className="border-t my-2 pt-2 text-xs text-gray-400 uppercase font-bold">Механізми (для довідки)</div>
-             {PRODUCTS.filter(p => p.category !== 'frame').map(p => ( <div key={p.id} className="flex items-center gap-3 p-2 border rounded opacity-50 bg-gray-50"> <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-xs text-gray-500 font-bold">{p.series}</div> <div className="text-sm"> <div className="font-medium">{p.name}</div> <div className="text-xs text-gray-500">{p.price} ₴</div> </div> </div> ))}
+             
+             {/* RECENTLY USED */}
+             {recentProducts.length > 0 && (
+                 <div className="mb-4">
+                     <div className="text-xs text-gray-400 uppercase font-bold mb-2">Нещодавно використані</div>
+                     {recentProducts.map(renderCatalogItem)}
+                 </div>
+             )}
+
+             {/* GROUPED PRODUCTS */}
+             {Object.entries(groupedProducts).map(([brand, data]) => (
+                 <details key={brand} open className="group mb-2">
+                     <summary className="font-bold text-gray-800 cursor-pointer list-none flex items-center gap-2 bg-gray-100 p-2 rounded hover:bg-gray-200">
+                         <ChevronRight size={16} className="transition-transform group-open:rotate-90"/> {brand}
+                     </summary>
+                     <div className="pl-2 pt-2">
+                         {/* FRAMES */}
+                         {Object.keys(data.frames).length > 0 && (
+                             <div className="mb-2">
+                                 <div className="text-xs text-gray-500 font-bold uppercase mb-1 pl-2">Рамки</div>
+                                 {Object.entries(data.frames).map(([series, items]) => (
+                                     <details key={series} className="group/series ml-2 mb-1">
+                                         <summary className="text-sm font-medium cursor-pointer list-none flex items-center gap-1 text-gray-700 hover:text-blue-600">
+                                             <ChevronRight size={14} className="transition-transform group-open/series:rotate-90"/> {series}
+                                         </summary>
+                                         <div className="pl-2 pt-1">
+                                             {items.sort((a,b) => a.gangs - b.gangs).map(renderCatalogItem)}
+                                         </div>
+                                     </details>
+                                 ))}
+                             </div>
+                         )}
+                         {/* MECHANISMS */}
+                         {Object.keys(data.mechanisms).length > 0 && (
+                             <div className="mb-2">
+                                 <div className="text-xs text-gray-500 font-bold uppercase mb-1 pl-2">Механізми</div>
+                                 {Object.entries(data.mechanisms).map(([func, items]) => (
+                                     <div key={func} className="ml-2 mb-2">
+                                         <div className="text-xs font-bold text-gray-600 mb-1 pl-4 border-l-2 border-gray-200">{func}</div>
+                                         <div className="pl-2">
+                                             {items.sort((a,b) => a.name.localeCompare(b.name)).map(renderCatalogItem)}
+                                         </div>
+                                     </div>
+                                 ))}
+                             </div>
+                         )}
+                     </div>
+                 </details>
+             ))}
            </div>
            <div className="h-1/3 border-t bg-gray-50 flex flex-col">
                <div className="p-3 border-b text-sm font-bold flex justify-between"><span>Всього</span><span className="text-blue-600">{bom.total} ₴</span></div>
@@ -1074,9 +1299,53 @@ const App = () => {
 
         {/* PLAN MODE VIEW */}
         <div className={`flex-1 bg-gray-200 relative overflow-hidden flex items-center justify-center ${viewMode === 'list' && !isPreviewMode ? 'hidden' : ''} ${isPreviewMode ? 'bg-white block h-auto p-0 m-0' : ''} print:block print:bg-white print:w-full print:h-auto print:overflow-visible print:static`}>
-            {!isPreviewMode && ( <div className="absolute top-4 left-4 bg-white p-1.5 rounded shadow flex flex-col gap-2 z-20 screen-only"> <button onClick={handleDelete} disabled={selectedIds.length === 0} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-red-600 hover:bg-red-50'}`} title="Видалити"><Trash2 size={20}/></button> <button onClick={handleRotate} disabled={selectedIds.length === 0 || selectedType === 'room'} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'}`} title="Обернути"><RotateCw size={20}/></button> <button onClick={handleTogglePin} disabled={selectedIds.length === 0 || selectedType !== 'item'} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-orange-600 hover:bg-orange-50'}`} title="Закріпити/Відкріпити"> {items.find(i => selectedIds.includes(i.uniqueId))?.isPinned ? <Lock size={20}/> : <Unlock size={20}/>} </button> <div className="h-px bg-gray-200 my-1"></div> <button onClick={() => setScale(s => s * 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomIn size={20}/></button> <button onClick={() => setScale(s => s / 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomOut size={20}/></button> </div> )}
+            {!isPreviewMode && ( 
+                <div className="absolute top-4 left-4 bg-white p-1.5 rounded shadow flex flex-col gap-2 z-20 screen-only"> 
+                    <button onClick={handleDelete} disabled={selectedIds.length === 0} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-red-600 hover:bg-red-50'}`} title="Видалити"><Trash2 size={20}/></button> 
+                    <button onClick={handleRotate} disabled={selectedIds.length === 0 || selectedType === 'room'} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-blue-600 hover:bg-blue-50'}`} title="Обернути"><RotateCw size={20}/></button> 
+                    <button onClick={() => selectedIds.length === 1 && setReplaceModal({ isOpen: true, itemId: selectedIds[0] })} disabled={selectedIds.length !== 1 || selectedType !== 'item'} className={`p-2 rounded ${selectedIds.length !== 1 ? 'text-gray-300' : 'text-purple-600 hover:bg-purple-50'}`} title="Замінити / Колір"><Palette size={20}/></button>
+                    <button onClick={handleTogglePin} disabled={selectedIds.length === 0 || selectedType !== 'item'} className={`p-2 rounded ${selectedIds.length === 0 ? 'text-gray-300' : 'text-orange-600 hover:bg-orange-50'}`} title="Закріпити/Відкріпити"> {items.find(i => selectedIds.includes(i.uniqueId))?.isPinned ? <Lock size={20}/> : <Unlock size={20}/>} </button> 
+                    
+                    {selectedIds.length === 1 && items.find(i => i.uniqueId === selectedIds[0])?.series === 'E2 Flat' && (
+                        <>
+                            <div className="h-px bg-gray-200 my-1"></div>
+                            <div className="flex flex-col gap-1 bg-gray-50 rounded p-1">
+                                <div className="text-[10px] font-bold text-gray-500 text-center">Тип стіни</div>
+                                <button onClick={() => updateWallType('brick')} className={`p-1.5 rounded text-xs flex items-center gap-1 ${items.find(i => i.uniqueId === selectedIds[0])?.wallType === 'brick' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:bg-gray-200'}`} title="Цегляна стіна"><BrickWall size={16} /> Цегла</button>
+                                <button onClick={() => updateWallType('gypsum')} className={`p-1.5 rounded text-xs flex items-center gap-1 ${items.find(i => i.uniqueId === selectedIds[0])?.wallType === 'gypsum' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:bg-gray-200'}`} title="Гіпсова стіна"><Layers size={16} /> Гіпс</button>
+                            </div>
+                        </>
+                    )}
+
+                    <div className="h-px bg-gray-200 my-1"></div> 
+                    <button onClick={() => setScale(s => s * 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomIn size={20}/></button> 
+                    <button onClick={() => setScale(s => s / 1.2)} className="p-2 hover:bg-gray-100 rounded"><ZoomOut size={20}/></button> 
+                </div> 
+            )}
             <div className={`hidden mb-6 border-b pb-4 ${isPreviewMode ? 'block' : ''} print:block`}> <h1 className="text-3xl font-bold">{projectName}</h1> </div>
             {showCalibModal && ( <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center screen-only"> <div className="bg-white rounded p-6"> <h3>Введіть реальний розмір (мм)</h3> <input type="number" value={calibInputMm} onChange={e=>setCalibInputMm(e.target.value)} className="border p-2 w-full my-4"/> <button onClick={confirmCalibration} className="bg-blue-600 text-white px-4 py-2 rounded">ОК</button> </div> </div> )}
+            
+            {replaceModal.isOpen && (
+                <div className="absolute inset-0 bg-black/50 z-50 flex items-center justify-center screen-only" onClick={() => setReplaceModal({ isOpen: false, itemId: null })}>
+                    <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold mb-4">Оберіть варіант для заміни</h3>
+                        <div className="space-y-2">
+                            {(() => {
+                                const target = items.find(i => i.uniqueId === replaceModal.itemId);
+                                if (!target) return null;
+                                const variants = products.filter(p => p.category === target.category && p.series === target.series && p.shape === target.shape && (target.category !== 'frame' || p.gangs === target.gangs) && p.id !== target.id);
+                                if (variants.length === 0) return <div className="text-gray-500">Немає доступних варіантів</div>;
+                                return variants.map(p => (
+                                    <div key={p.id} className="flex items-center justify-between p-2 border rounded hover:bg-blue-50">
+                                        <div className="flex items-center gap-2"><div className="w-6 h-6 rounded border" style={{backgroundColor: p.color}}></div><span className="text-sm font-medium">{p.name}</span></div>
+                                        <div className="flex gap-1"><button onClick={() => handleReplaceApply(p, 'single')} className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">Цей</button><button onClick={() => handleReplaceApply(p, 'room')} className="px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded">Всі в кімнаті</button></div>
+                                    </div>
+                                ));
+                            })()}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div ref={canvasRef} className={`w-full h-full relative overflow-hidden ${isPreviewMode ? 'h-[500px] border border-gray-300 mb-8' : ''} print:h-[500px] print:w-full print:border print:border-gray-300 print:mb-8`} style={{ cursor: activeTool==='hand' || isPanning ? 'grabbing' : activeTool==='room' ? 'crosshair' : 'default' }} onMouseDown={handleMouseDown} onContextMenu={e => e.preventDefault()} onDrop={handleDropOnCanvas} onDragOver={e => e.preventDefault()}>
                 
@@ -1130,8 +1399,52 @@ const App = () => {
                         <rect x={-50000} y={-50000} width={100000} height={100000} fill={planImage ? 'none' : 'white'} pointerEvents="none" />
                         {!planImage && <rect x={-50000} y={-50000} width={100000} height={100000} fill="url(#grid)" pointerEvents="none" />}
                         {planImage ? (<g transform={`scale(${planScale})`}><image href={planImage} x={0} y={0} width={worldSize.width} height={worldSize.height} style={{ opacity: 0.9 }} pointerEvents="none" /></g>) : (<g opacity="0.5"><path d="M 0 0 L 5000 0 L 5000 3500 L 0 3500 L 0 0" stroke="#333" strokeWidth="10" fill="white" /><text x="100" y="200" fontSize="100" fill="#999" fontFamily="Arial">Demo Plan (5x3.5m)</text></g>)}
-                        {rooms.filter(r => r.width).map(room => ( <g key={room.id} onClick={(e) => { if(activeTool==='select'){ e.stopPropagation(); setSelectedIds([room.id]); setSelectedType('room'); } }}> <rect x={room.x} y={room.y} width={room.width} height={room.height} fill={selectedIds.includes(room.id) ? "rgba(37, 99, 235, 0.2)" : "rgba(37, 99, 235, 0.05)"} stroke="#2563eb" strokeWidth={4/scale} strokeDasharray={`${20/scale} ${10/scale}`} /> <text x={room.x + 10} y={room.y + 40/scale} fontSize={40/scale} fill="#2563eb" fontWeight="bold" pointerEvents="none">{room.name}</text> </g> ))}
-                        {currentDrawingRoom && ( <rect x={currentDrawingRoom.x} y={currentDrawingRoom.y} width={currentDrawingRoom.width} height={currentDrawingRoom.height} fill="rgba(37, 99, 235, 0.1)" stroke="#2563eb" strokeWidth={2/scale} /> )}
+                        
+                        {rooms.map(room => (
+                            <g key={room.id} onClick={(e) => { if(activeTool==='select'){ e.stopPropagation(); setSelectedIds([room.id]); setSelectedType('room'); } }}>
+                                {room.points ? (
+                                    <polygon 
+                                        points={room.points.map(p => `${p.x},${p.y}`).join(' ')}
+                                        fill={selectedIds.includes(room.id) ? "rgba(37, 99, 235, 0.2)" : "rgba(37, 99, 235, 0.05)"}
+                                        stroke="#2563eb"
+                                        strokeWidth={4/scale}
+                                        strokeDasharray={`${20/scale} ${10/scale}`}
+                                    />
+                                ) : (
+                                    <rect x={room.x} y={room.y} width={room.width} height={room.height} fill={selectedIds.includes(room.id) ? "rgba(37, 99, 235, 0.2)" : "rgba(37, 99, 235, 0.05)"} stroke="#2563eb" strokeWidth={4/scale} strokeDasharray={`${20/scale} ${10/scale}`} />
+                                )}
+                                {(() => {
+                                    const center = getRoomCenter(room);
+                                    return (
+                                        <text 
+                                            x={center.x} 
+                                            y={center.y} 
+                                            fontSize={100 * planScale} 
+                                            fill="#2563eb" 
+                                            fontWeight="bold" 
+                                            textAnchor="middle" 
+                                            dominantBaseline="middle"
+                                            pointerEvents="none"
+                                        >
+                                            {room.name}
+                                        </text>
+                                    );
+                                })()}
+                            </g>
+                        ))}
+
+                        {isDrawingRoom && roomPoints.length > 0 && (
+                            <g pointerEvents="none">
+                                <polyline 
+                                    points={[...roomPoints, tempMousePos].filter(Boolean).map(p => `${p!.x},${p!.y}`).join(' ')}
+                                    fill="rgba(37, 99, 235, 0.1)"
+                                    stroke="#2563eb"
+                                    strokeWidth={2/scale}
+                                />
+                                {roomPoints.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={5/scale} fill={i === 0 ? "red" : "#2563eb"} />)}
+                            </g>
+                        )}
+
                         {selectionBox && <rect x={selectionBox.x} y={selectionBox.y} width={selectionBox.width} height={selectionBox.height} fill="rgba(37, 99, 235, 0.1)" stroke="#2563eb" strokeWidth={1/scale} strokeDasharray="4 2" />}
                         {items.filter(i => typeof i.x === 'number').map(item => {
                             const isSelected = selectedIds.includes(item.uniqueId);
@@ -1140,9 +1453,9 @@ const App = () => {
                                     <ProductShape item={item} isSelected={isSelected} onSlotClick={(slotIdx) => handleSlotClick(item.uniqueId, slotIdx)} />
                                     {isSelected && !item.isPinned && (
                                         <g onMouseDown={(e) => startRotationDrag(e, item)} style={{ cursor: 'alias' }}>
-                                            <line x1={item.width/2} y1={0} x2={item.width/2} y2={-35/scale} stroke="#3b82f6" strokeWidth={2/scale} vectorEffect="non-scaling-stroke" strokeDasharray="4 2" />
-                                            <circle cx={item.width/2} cy={-35/scale} r={12/scale} fill="white" stroke="#3b82f6" strokeWidth={2/scale} vectorEffect="non-scaling-stroke" />
-                                            <path d={`M ${item.width/2 - 3/scale} ${-35/scale} L ${item.width/2 + 3/scale} ${-35/scale} M ${item.width/2} ${-38/scale} L ${item.width/2 + 3/scale} ${-35/scale} L ${item.width/2} ${-32/scale}`} fill="none" stroke="#3b82f6" strokeWidth={1.5/scale} vectorEffect="non-scaling-stroke" />
+                                            <line x1={item.width/2} y1={0} x2={item.width/2} y2={-30} stroke="#3b82f6" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeDasharray="4 2" />
+                                            <circle cx={item.width/2} cy={-30} r={10} fill="white" stroke="#3b82f6" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+                                            <path d={`M ${item.width/2 - 4} ${-30} L ${item.width/2 + 4} ${-30} M ${item.width/2} ${-34} L ${item.width/2 + 4} ${-30} L ${item.width/2} ${-26}`} fill="none" stroke="#3b82f6" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
                                         </g>
                                     )}
                                 </g>
